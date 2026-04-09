@@ -311,15 +311,16 @@ the gradient of the distance can be evaluated to:
 
 Combining the expressions, we have:
 ```math
-\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times \frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|} \left( jk + \frac{1}{|\mathbf{r} - \mathbf{r}'|} \right) \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
+\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times \left(\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|} \right) \left( jk + \frac{1}{|\mathbf{r} - \mathbf{r}'|} \right) \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
 ```
 Rearranging the terms:
 ```math
 \mathbf{B}(\mathbf{r}) = jk\frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times 
-\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}
+\left(\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}\right)
 \frac {e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r' + 
 \frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times 
-\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}  \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|^2} d^3r'.
+\left(\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}\right)
+\frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|^2} d^3r'.
 ```
 The second term in this expression is the Biot-Savart equation for magnetic fields, and corresponds to the near-field magnetic propagation. The first term is the far-field radiation expression. 
 
