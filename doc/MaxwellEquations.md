@@ -214,7 +214,7 @@ G(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta(t - t' - \frac{|\mathbf{r} - \m
 ```
 where $c$ is the speed of light in vacuum, and $\delta$ is the Dirac delta function. 
 This Green's function represents the response of the system at position $\mathbf{r}$ and time $t$ due to 
-a point source located at position $\mathbf{r}'$ and time $t'$. The delta function ensures that the response 
+a point source located at position $\mathbf{r}'$ that emits an impulse at time $t'$. The delta function ensures that the response 
 occurs only when the time difference matches the time it takes for a signal to travel from the source to the 
 observation point at the speed of light.
 
@@ -260,5 +260,14 @@ Thus the scalar potential can be expressed as:
 \Phi(\mathbf{r}) = \frac{1}{4\pi \varepsilon_0} \int \frac{\rho(\mathbf{r}') e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
 ```
 
-### Solving the Electrical Field Integral Equation
+### Solving the Fields From the Potentials
+
+Having the scalar and vector potentials solutions at hand, the electric field strength is obtained from the fundamental relation between the potentials and the electric field:
+```math
+\mathbf{E}(\mathbf{r})=-\frac{\partial \mathbf{A}(\mathbf{r})}{\partial t}-\nabla\Phi(\mathbf{r}),
+```
+while the magnetic flux intensity is readly available from the defining property of the vector potential:
+```math
+\mathbf{B}(\mathbf{r})=\nabla\times\mathbf{A}(\mathbf{r}).
+```
 
