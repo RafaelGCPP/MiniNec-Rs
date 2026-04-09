@@ -127,7 +127,7 @@ Here we have again an inhomogeneous wave equation for the vector potential, but 
 $$
 \nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t} = 0.
 $$
-This gauge condition simplifies the equations to:
+This gauge condition simplifies the vector potential equation to:
 $$
 \nabla^2 \mathbf{A} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t} = -\mu_0 \mathbf{J}
 $$
