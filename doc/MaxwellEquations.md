@@ -10,12 +10,12 @@ Before diving into the Maxwell equations, it's important to have a basic underst
 
 * A scalar field is a function that assigns a single value to every point in space, such as temperature or pressure. 
 
-* A vector field is a mathematical representation of a physical quantity that has both magnitude and direction at every point in space. In the context of electromagnetism, the electric field ($ \mathbf{E} $) and magnetic field ($ \mathbf{B} $) are examples of vector fields.
+* A vector field is a mathematical representation of a physical quantity that has both magnitude and direction at every point in space. In the context of electromagnetism, the electric field ($\mathbf{E}$) and magnetic field ($\mathbf{B}$) are examples of vector fields.
 
-For some vector field $ \mathbf{V} $, here are some key concepts:
-1. **Gradient ($ \nabla \mathbf{V} $)**: The gradient of a scalar field (a function that assigns a single value to every point in space) points in the direction of the greatest rate of increase of the field and has a magnitude equal to that rate of increase.
-2. **Divergence ($ \nabla \cdot \mathbf{V} $)**: The divergence of a vector field measures the net flow of the field out of an infinitesimal volume. A positive divergence indicates a source, while a negative divergence indicates a sink.
-3. **Curl ($ \nabla \times \mathbf{V} $)**: The curl of a vector field measures the rotation or swirling of the field around a point. A non-zero curl indicates that the field has a rotational component.
+For some vector field $\mathbf{V}$, here are some key concepts:
+1. **Gradient ($\nabla \mathbf{V}$)**: The gradient of a scalar field (a function that assigns a single value to every point in space) points in the direction of the greatest rate of increase of the field and has a magnitude equal to that rate of increase.
+2. **Divergence ($\nabla \cdot \mathbf{V}$)**: The divergence of a vector field measures the net flow of the field out of an infinitesimal volume. A positive divergence indicates a source, while a negative divergence indicates a sink.
+3. **Curl ($\nabla \times \mathbf{V}$)**: The curl of a vector field measures the rotation or swirling of the field around a point. A non-zero curl indicates that the field has a rotational component.
 
 Those differential operators are fundamental in expressing the Maxwell equations, as they describe how the electric and magnetic fields change in space and time.
 
