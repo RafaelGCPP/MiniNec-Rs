@@ -44,26 +44,18 @@ $\mathbf{B}$ as the magnetic flux density, $\rho$ as the charge density, and $\m
 the current density.
 
 The Gauss's Laws for electricity and magnetism are expressed as the divergence of such fields:
-$$ 
-\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0},
-$$
-$$
-\nabla \cdot \mathbf{B} = 0.
-$$
+$$\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0},$$
+$$\nabla \cdot \mathbf{B} = 0.$$
 Their physical interpretation is that the electric field lines begin and end on electric charges, 
 and that there is no magnetic monopoles, thus there is no sink or source for magnetic field lines. 
 
 Faraday's Law of Induction is expressed as the curl of the electric field:
-$$ 
-\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t},
-$$
+$$\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t},$$
 and it describes how a time-varying magnetic field induces a circulating electric 
 field in its perpendicular plane.
 
 Finally, Ampère's Law with Maxwell's Addition is expressed as the curl of the magnetic field:
-$$ 
-\nabla \times \mathbf{B} = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t},
-$$
+$$\nabla \times \mathbf{B} = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t},$$
 and it describes how an electric current density $\mathbf{J}$ induce a circulating magnetic field 
 in their perpendicular plane. Maxwell's Addition term includes the circulating magnetic field induced by a
 time-varying electric field.
