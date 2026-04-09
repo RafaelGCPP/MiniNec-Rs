@@ -44,18 +44,26 @@ $\mathbf{B}$ as the magnetic flux density, $\rho$ as the charge density, and $\m
 the current density.
 
 The Gauss's Laws for electricity and magnetism are expressed as the divergence of such fields:
-$$\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0},$$
-$$\nabla \cdot \mathbf{B} = 0.$$
+```math
+\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0},
+```
+```math
+\nabla \cdot \mathbf{B} = 0.
+```
 Their physical interpretation is that the electric field lines begin and end on electric charges, 
 and that there is no magnetic monopoles, thus there is no sink or source for magnetic field lines. 
 
 Faraday's Law of Induction is expressed as the curl of the electric field:
-$$\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t},$$
+```math
+\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t},
+```
 and it describes how a time-varying magnetic field induces a circulating electric 
 field in its perpendicular plane.
 
 Finally, Ampère's Law with Maxwell's Addition is expressed as the curl of the magnetic field:
-$$\nabla \times \mathbf{B} = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t},$$
+```math
+\nabla \times \mathbf{B} = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t},
+```
 and it describes how an electric current density $\mathbf{J}$ induce a circulating magnetic field 
 in their perpendicular plane. Maxwell's Addition term includes the circulating magnetic field induced by a
 time-varying electric field.
@@ -65,29 +73,29 @@ time-varying electric field.
 
 By manipulating the Maxwell's equations using vector calculus, we can derive the wave equations for the electric and magnetic fields.
 First it is useful to define the magnetic field strenght $$\mathbf{H}=\frac{1}{\mu_0}\mathbf{B},$$ then, by applying the curl operator to Faraday's Law of Induction and using the vector calculus identities, we can derive the Helmholtz equations for the electric and magnetic fields:
-$$
+```math
 \nabla \times (\nabla \times \mathbf{E}) = \nabla \times( -\mu_0\frac{\partial \mathbf{H}}{\partial t})
-$$
+```
 
 The time derivative and curl operator commute, so we can rewrite the equation as:
-$$
+```math
 \nabla \times (\nabla \times \mathbf{E}) = -\mu_0 \frac{\partial}{\partial t} (\nabla \times \mathbf{H})
-$$
+```
 
 Now we substitute Ampère's Law with Maxwell's Addition into the equation:
-$$
+```math
 \nabla \times (\nabla \times \mathbf{E}) = -\mu_0 \frac{\partial}{\partial t}\mathbf{J} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{E}}{\partial^2 t}
-$$
+```
 
 Using the vector calculus identity $\nabla \times (\nabla \times \mathbf{E}) = \nabla (\nabla \cdot \mathbf{E}) - \nabla^2 \mathbf{E}$ we get:
-$$
+```math
 \nabla (\nabla \cdot \mathbf{E}) - \nabla^2 \mathbf{E} = -\mu_0 \frac{\partial}{\partial t}\mathbf{J} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{E}}{\partial^2 t}
-$$
+```
 
 We then rearrange the equation and apply Gauss's Law for Electricity to express the divergence of the electric field in terms of the charge density:
-$$
+```math
 \nabla^2 \mathbf{E} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{E}}{\partial^2 t} = \nabla (\frac{\rho}{\varepsilon_0}) + \mu_0 \frac{\partial}{\partial t}\mathbf{J}
-$$
+```
 
 This is called the non-homogenous wave equation for the electric field. In the antenna simulation scenario, 
 this equation poses a challenge as we need, beside segment currents, the charge distribution gradient over space.
@@ -97,9 +105,9 @@ this equation poses a challenge as we need, beside segment currents, the charge 
 As a means to solve the problem of needing the charge distribution gradient, we can introduce 
 the vector potential **A** and scalar potential **φ** to express the electric and magnetic fields. 
 The vector potential is defined such that:
-$$
+```math
 \mathbf{B} = \nabla \times \mathbf{A}
-$$
+```
 
 This definition is justified by Gauss's Law for Magnetism, which states that $\nabla \cdot \mathbf{B} = 0$. 
 Since the divergence of any curl is always zero, we can express the magnetic field as the curl of a vector 
@@ -108,83 +116,83 @@ with the magnetic field, we can work with the vector potential, which often simp
 and calculations involved in electromagnetic problems.
 
 Also, by using the vector potential in Faraday's Law of Induction
-$$
+```math
 \nabla \times \mathbf{E} = -\frac{\partial}{\partial t} (\nabla \times \mathbf{A}),
-$$
+```
 and collecting all terms inside the curl operator, we get the expression
-$$
+```math
 \nabla \times (\mathbf{E} + \frac{\partial \mathbf{A}}{\partial t}) = 0.
-$$
+```
 
 The curl of a gradient is always zero, the expression inside the curl can be represented by the gradient 
 of a scalar potential:
-$$
+```math
 \mathbf{E} + \frac{\partial \mathbf{A}}{\partial t} = -\nabla \phi,
-$$
+```
 where the negative sign is a convention to ensure that the electric field points in the direction of 
 decreasing potential. This equation shows how the electric field can be expressed in terms of the 
 vector potential and the scalar potential, which is particularly useful in solving electromagnetic 
 problems, such as those involving antennas. Thus the electric field can be expressed as:
-$$
+```math
 \mathbf{E} = -\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}.
-$$
+```
 
 Now, applying those two definitions in the Ampère's Law with Maxwell's Addition, we can derive the 
 wave equations for the vector and scalar potentials. The resulting equation is known as the inhomogeneous 
 wave equation for the potentials, and it is given by:
-$$
+```math
 \nabla \times (\nabla \times \mathbf{A}) = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial}{\partial t}(-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t})
-$$
+```
 
 Applying the curl of the curl identity and rearranging the equation, we get:
-$$
+```math
 \nabla (\nabla \cdot \mathbf{A}) - \nabla^2 \mathbf{A} = \mu_0 \mathbf{J} - \mu_0 \varepsilon_0 \nabla \frac{\partial \phi}{\partial t} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t}
-$$
+```
 
 Next, by collecting the terms under the gradient operator, we can express the equation as:
-$$
+```math
 \nabla (\nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t}) - \nabla^2 \mathbf{A} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t} = \mu_0 \mathbf{J}
-$$
+```
 
 Here we have again an inhomogeneous wave equation for the vector potential, and it is clearly coupled with
 the scalar potential through the term $\nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t}$. 
 To decouple these equations, we can choose a specific gauge condition, such as the Lorenz gauge, 
 which is defined by:
-$$
+```math
 \nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t} = 0.
-$$
+```
 This gauge condition simplifies the vector potential equation to:
-$$
+```math
 \nabla^2 \mathbf{A} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t} = -\mu_0 \mathbf{J}
-$$
+```
 which is a homogeneous wave equation for the vector potential.
 
 The scalar potential can be derived from the Gauss's Law for Electricity by substituting the expression for the electric field in terms of the potentials:
-$$
+```math
 \nabla \cdot (-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}) = \frac{\rho}{\varepsilon_0}
-$$
+```
 Rearranging the equation, we get:
-$$
+```math
 \nabla^2 \phi + \frac{\partial}{\partial t} (\nabla   \cdot \mathbf{A}) = -\frac{\rho}{\varepsilon_0}
-$$
+```
 Applying the Lorenz gauge condition, we can simplify this equation to:
-$$
+```math
 \nabla^2 \phi - \mu_0 \varepsilon_0 \frac{\partial^2 \phi}{\partial^2 t} = -\frac{\rho}{\varepsilon_0}
-$$
+```
 which is a homogeneous wave equation for the scalar potential.
 
 Note that we have the relation between the speed of light in vacuum $c$, 
 the permeability ($\mu_0$) and permittivity ($\varepsilon_0$) of free space:
-$$ 
+```math 
 c = \frac{1}{\sqrt{\mu_0 \varepsilon_0}}
-$$
+```
 and thus we can rewrite the wave equations for the vector and scalar potentials in terms of the speed of light as:
-$$
+```math
 \nabla^2 \mathbf{A} - \frac{1}{c^2}\frac{\partial^2 \mathbf{A}}{\partial^2 t} = -\mu_0 \mathbf{J}
-$$
-$$
+```
+```math
 \nabla^2 \phi - \frac{1}{c^2} \frac{\partial^2 \phi}{\partial^2 t} = -\frac{\rho}{\varepsilon_0}
-$$
+```
 Those wave equations represent respectively, the induction and radiation components of the electromagnetic
 field, and they can be solved independently due to the Lorenz gauge condition.
 
@@ -201,9 +209,9 @@ response of the system to a point impulse source, and it can be used to construc
 source distribution by means of convolution operations.
 
 The Green's function for the wave equation in three-dimensional space is given by:
-$$
+```math
 G(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{4\pi |\mathbf{r} - \mathbf{r}'|}   
-$$
+```
 where $c$ is the speed of light in vacuum, and $\delta$ is the Dirac delta function. 
 This Green's function represents the response of the system at position $\mathbf{r}$ and time $t$ due to 
 a point source located at position $\mathbf{r}'$ and time $t'$. The delta function ensures that the response 
@@ -211,46 +219,46 @@ occurs only when the time difference matches the time it takes for a signal to t
 observation point at the speed of light.
 
 Using the Green's function, we can express the solutions for the vector potential as an integral over the source distribution:
-$$
+```math
 \mathbf{A}(\mathbf{r}, t) = \mu_0 \int \int G(\mathbf{r}, t; \mathbf{r}', t') \mathbf{J}(\mathbf{r}', t') d^3r' dt'
-$$
+```
 or
-$$
+```math
 \mathbf{A}(\mathbf{r}, t) = \mu_0 \int \int \frac{\delta(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{4\pi |\mathbf{r} - \mathbf{r}'|} \mathbf{J}(\mathbf{r}', t') d^3r' dt'
-$$
+```
 
 The time integral can easily be evaluated by defining the retarded time 
 $t' = t - \frac{|\mathbf{r} - \mathbf{r}'|}{c}$, 
 which accounts for the time it takes for the signal to propagate from the source to the observation point.
 Then, by the shifting property of the Dirac delta distribution, this leads to the expression:
-$$
+```math
 \mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}', t - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
-$$
+```
 
 In most practical applications, such as antenna simulations, the current distribution $\mathbf{J}$ is assumed 
 to be time-harmonic, meaning it varies sinusoidally with time. In this case, we can express the current as:
-$$
+```math
 \mathbf{J}(\mathbf{r}', t') = \mathbf{J}(\mathbf{r}') e^{j\omega t'} = \mathbf{J}(\mathbf{r}') e^{j\omega (t - \frac{|\mathbf{r} - \mathbf{r}'|}{c})} = \mathbf{J}(\mathbf{r}') e^{j\omega t} e^{-j\omega \frac{|\mathbf{r} - \mathbf{r}'|}{c}}.
-$$
+```
 where $\omega$ is the angular frequency of the current. Substituting this into the expression for 
 the vector potential, we get:
-$$
+```math
 \mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} e^{j\omega t} \int \frac{\mathbf{J}(\mathbf{r}') e^{-j\omega \frac{|\mathbf{r} - \mathbf{r}'|}{c}}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
-$$
+```
 
 Introducing the wavenumber $k = \frac{\omega}{c}$, and assuming $t=0$, we can rewrite the expression in its final form:
-$$
+```math
 \mathbf{A}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}') e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
-$$
+```
 
 Due to the symmetry established by the Lorenz Gauge, the scalar potential $\Phi$ obeys a wave equation 
 identical in form to that of the vector potential $\mathbf{A}$. Consequently, its solution follows the 
 same Green's function approach, substituting the current density $\mathbf{J}$ for the charge density 
 $\rho$ and the permeability $\mu_0$ for the inverse of the permittivity $1/\epsilon_0$.
 Thus the scalar potential can be expressed as:
-$$
+```math
 \Phi(\mathbf{r}) = \frac{1}{4\pi \varepsilon_0} \int \frac{\rho(\mathbf{r}') e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
-$$
+```
 
 ### Solving the Electrical Field Integral Equation
 
