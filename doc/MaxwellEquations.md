@@ -264,10 +264,63 @@ Thus the scalar potential can be expressed as:
 
 Having the scalar and vector potentials solutions at hand, the electric field strength is obtained from the fundamental relation between the potentials and the electric field:
 ```math
-\mathbf{E}(\mathbf{r})=-\frac{\partial \mathbf{A}(\mathbf{r})}{\partial t}-\nabla\Phi(\mathbf{r}),
+\mathbf{E}(\mathbf{r},t)=-\frac{\partial \mathbf{A}(\mathbf{r},t)}{\partial t}-\nabla\Phi(\mathbf{r},t),
 ```
-while the magnetic flux intensity is readly available from the defining property of the vector potential:
+which in the frequency domain becomes:
+```math
+\mathbf{E}(\mathbf{r})=-j\omega\mathbf{A}(\mathbf{r})-\nabla\Phi(\mathbf{r}).
+```
+
+Although not used in the method of moments for antenna simulation, the magnetic flux intensity is readily available from the defining property of the vector potential:
 ```math
 \mathbf{B}(\mathbf{r})=\nabla\times\mathbf{A}(\mathbf{r}).
 ```
+Expanding the expression using the previously calculated $\mathbf{A}(\mathbf{r})$, we have:
+```math
+\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int_{V} \nabla \times \left( \mathbf{J}(\mathbf{r}') \frac{e^{-jk|\mathbf{r}-\mathbf{r}'|}}{|\mathbf{r}-\mathbf{r}'|} \right) d^3r'.
+```
+This integral can be simplified by the relation $\nabla \times (f \mathbf{V}) = (\nabla f) \times \mathbf{V} + f\cdot(\nabla \times \mathbf{V})$, which is valid for any scalar function $f$. Defining:
+```math
+f(\mathbf{r}) =  \left( \frac{e^{-jk|\mathbf{r}-\mathbf{r}'|}}{|\mathbf{r}-\mathbf{r}'|} \right),
+```
+we can rewrite:
+```math
+\nabla \times \left( \mathbf{J}(\mathbf{r}') f(\mathbf{r})\right)=
+\nabla \left(f(\mathbf{r})\right) \times \mathbf{J}(\mathbf{r}')+f(\mathbf{r})\cdot(\nabla\times\mathbf{J}(\mathbf{r}')). 
+```
+Since the curl operator $\nabla$ acts upon the observation coordinates $\mathbf{r}$, and the current density $\mathbf{J}(\mathbf{r}')$ is a function only of the source coordinates $\mathbf{r}'$, the term $\nabla \times \mathbf{J}(\mathbf{r}')$ is identically zero, and the second term on the right hand side vanishes:
+```math
+\nabla \times \left( \mathbf{J}(\mathbf{r}') f(\mathbf{r})\right)=
+\nabla \left(f(\mathbf{r})\right) \times \mathbf{J}(\mathbf{r}'). 
+```
 
+If we define the distance function $R = |\mathbf{r} - \mathbf{r}'|$, 
+we can evaluate the gradient of the scalar function by using the chain rule
+```math
+\nabla f(R) = \frac{df}{dR} \nabla R.
+```
+Then we have
+```math
+\frac{\partial f(R)}{\partial R}=\frac{\partial}{\partial R}\left( \frac{e^{-jkR}}{R} \right)= -\left( jk + \frac{1}{R} \right) \frac{e^{-jkR}}{R},
+```
+and 
+the gradient of the distance can be evaluated to:
+```math
+\nabla |\mathbf{r} - \mathbf{r}'| = \frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|} = \hat{\mathbf{R}}.
+```
+
+Combining the expressions, we have:
+```math
+\mathbf{B}(\mathbf{r}) = \frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times \frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|} \left( jk + \frac{1}{|\mathbf{r} - \mathbf{r}'|} \right) \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
+```
+Rearranging the terms:
+```math
+\mathbf{B}(\mathbf{r}) = jk\frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times 
+\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}
+\frac {e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} d^3r' + 
+\frac{\mu_0}{4\pi} \int_{V} \mathbf{J}(\mathbf{r}') \times 
+\frac{\mathbf{r} - \mathbf{r}'}{|\mathbf{r} - \mathbf{r}'|}  \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|^2} d^3r'.
+```
+The second term in this expression is the Biot-Savart equation for magnetic fields, and corresponds to the near-field magnetic propagation. The first term is the far-field radiation expression. 
+
+Note that for direct current ($\omega = 0$), the far-field terms vanish entirely. The induced component of the electric field (proportional to $\partial \mathbf{A} / \partial t$) also becomes zero, leaving the system described by classic magnetostatics—represented by the magnetic near-field—and electrostatics, where the electric field arises solely from the stationary charge distribution ($\mathbf{E} = -\nabla\Phi$).
