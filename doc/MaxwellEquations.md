@@ -74,7 +74,7 @@ time-varying electric field.
 By manipulating the Maxwell's equations using vector calculus, we can derive the wave equations for the electric and magnetic fields.
 First it is useful to define the magnetic field strenght $$\mathbf{H}=\frac{1}{\mu_0}\mathbf{B},$$ then, by applying the curl operator to Faraday's Law of Induction and using the vector calculus identities, we can derive the Helmholtz equations for the electric and magnetic fields:
 ```math
-\nabla \times (\nabla \times \mathbf{E}) = \nabla \times( -\mu_0\frac{\partial \mathbf{H}}{\partial t})
+\nabla \times (\nabla \times \mathbf{E}) = \nabla \times\left( -\mu_0\frac{\partial \mathbf{H}}{\partial t}\right)
 ```
 
 The time derivative and curl operator commute, so we can rewrite the equation as:
@@ -94,7 +94,7 @@ Using the vector calculus identity $\nabla \times (\nabla \times \mathbf{E}) = \
 
 We then rearrange the equation and apply Gauss's Law for Electricity to express the divergence of the electric field in terms of the charge density:
 ```math
-\nabla^2 \mathbf{E} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{E}}{\partial^2 t} = \nabla (\frac{\rho}{\varepsilon_0}) + \mu_0 \frac{\partial}{\partial t}\mathbf{J}
+\nabla^2 \mathbf{E} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{E}}{\partial^2 t} = \nabla \left(\frac{\rho}{\varepsilon_0}\right) + \mu_0 \frac{\partial}{\partial t}\mathbf{J}
 ```
 
 This is called the non-homogenous wave equation for the electric field. In the antenna simulation scenario, 
@@ -121,7 +121,7 @@ Also, by using the vector potential in Faraday's Law of Induction
 ```
 and collecting all terms inside the curl operator, we get the expression
 ```math
-\nabla \times (\mathbf{E} + \frac{\partial \mathbf{A}}{\partial t}) = 0.
+\nabla \times \left(\mathbf{E} + \frac{\partial \mathbf{A}}{\partial t}\right) = 0.
 ```
 
 The curl of a gradient is always zero, the expression inside the curl can be represented by the gradient 
@@ -141,7 +141,7 @@ Now, applying those two definitions in the Ampère's Law with Maxwell's Addition
 wave equations for the vector and scalar potentials. The resulting equation is known as the inhomogeneous 
 wave equation for the potentials, and it is given by:
 ```math
-\nabla \times (\nabla \times \mathbf{A}) = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial}{\partial t}(-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t})
+\nabla \times (\nabla \times \mathbf{A}) = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial}{\partial t}\left(-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}\right)
 ```
 
 Applying the curl of the curl identity and rearranging the equation, we get:
@@ -151,7 +151,7 @@ Applying the curl of the curl identity and rearranging the equation, we get:
 
 Next, by collecting the terms under the gradient operator, we can express the equation as:
 ```math
-\nabla (\nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t}) - \nabla^2 \mathbf{A} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t} = \mu_0 \mathbf{J}
+\nabla \left(\nabla \cdot \mathbf{A} + \mu_0 \varepsilon_0 \frac{\partial \phi}{\partial t}\right) - \nabla^2 \mathbf{A} - \mu_0 \varepsilon_0 \frac{\partial^2 \mathbf{A}}{\partial^2 t} = \mu_0 \mathbf{J}
 ```
 
 Here we have again an inhomogeneous wave equation for the vector potential, and it is clearly coupled with
@@ -169,7 +169,7 @@ which is a homogeneous wave equation for the vector potential.
 
 The scalar potential can be derived from the Gauss's Law for Electricity by substituting the expression for the electric field in terms of the potentials:
 ```math
-\nabla \cdot (-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}) = \frac{\rho}{\varepsilon_0}
+\nabla \cdot \left(-\nabla \phi - \frac{\partial \mathbf{A}}{\partial t}\right) = \frac{\rho}{\varepsilon_0}
 ```
 Rearranging the equation, we get:
 ```math
@@ -210,7 +210,7 @@ source distribution by means of convolution operations.
 
 The Green's function for the wave equation in three-dimensional space is given by:
 ```math
-G(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{4\pi |\mathbf{r} - \mathbf{r}'|}   
+G(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta\left(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c}\right)}{4\pi |\mathbf{r} - \mathbf{r}'|}   
 ```
 where $c$ is the speed of light in vacuum, and $\delta$ is the Dirac delta function. 
 This Green's function represents the response of the system at position $\mathbf{r}$ and time $t$ due to 
@@ -224,7 +224,7 @@ Using the Green's function, we can express the solutions for the vector potentia
 ```
 or
 ```math
-\mathbf{A}(\mathbf{r}, t) = \mu_0 \int \int \frac{\delta(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{4\pi |\mathbf{r} - \mathbf{r}'|} \mathbf{J}(\mathbf{r}', t') d^3r' dt'
+\mathbf{A}(\mathbf{r}, t) = \mu_0 \int \int \frac{\delta\left(t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c}\right)}{4\pi |\mathbf{r} - \mathbf{r}'|} \mathbf{J}(\mathbf{r}', t') d^3r' dt'
 ```
 
 The time integral can easily be evaluated by defining the retarded time 
@@ -232,13 +232,13 @@ $t' = t - \frac{|\mathbf{r} - \mathbf{r}'|}{c}$,
 which accounts for the time it takes for the signal to propagate from the source to the observation point.
 Then, by the shifting property of the Dirac delta distribution, this leads to the expression:
 ```math
-\mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}(\mathbf{r}', t - \frac{|\mathbf{r} - \mathbf{r}'|}{c})}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
+\mathbf{A}(\mathbf{r}, t) = \frac{\mu_0}{4\pi} \int \frac{\mathbf{J}\left(\mathbf{r}', t - \frac{|\mathbf{r} - \mathbf{r}'|}{c}\right)}{|\mathbf{r} - \mathbf{r}'|} d^3r'.
 ```
 
 In most practical applications, such as antenna simulations, the current distribution $\mathbf{J}$ is assumed 
 to be time-harmonic, meaning it varies sinusoidally with time. In this case, we can express the current as:
 ```math
-\mathbf{J}(\mathbf{r}', t') = \mathbf{J}(\mathbf{r}') e^{j\omega t'} = \mathbf{J}(\mathbf{r}') e^{j\omega (t - \frac{|\mathbf{r} - \mathbf{r}'|}{c})} = \mathbf{J}(\mathbf{r}') e^{j\omega t} e^{-j\omega \frac{|\mathbf{r} - \mathbf{r}'|}{c}}.
+\mathbf{J}(\mathbf{r}', t') = \mathbf{J}(\mathbf{r}') e^{j\omega t'} = \mathbf{J}(\mathbf{r}') e^{j\omega \left(t - \frac{|\mathbf{r} - \mathbf{r}'|}{c}\right)} = \mathbf{J}(\mathbf{r}') e^{j\omega t} e^{-j\omega \frac{|\mathbf{r} - \mathbf{r}'|}{c}}.
 ```
 where $\omega$ is the angular frequency of the current. Substituting this into the expression for 
 the vector potential, we get:
