@@ -1,9 +1,14 @@
+
+// Gauss-Legendre quadrature integration module.
+
+
+// Integrable trait is a general interface for any function or struct that can be evaluated at a point.
 pub trait Integrable {
     type Output;
     fn eval(&self, x: f64) -> Self::Output;
 }
 
-
+// Implement Integrable for any function that matches the signature Fn(f64) -> Out
 impl<F, Out> Integrable for F 
 where F: Fn(f64) -> Out 
 {
@@ -14,6 +19,7 @@ where F: Fn(f64) -> Out
 }
 
 
+// Integrate a function `f` over the interval [a, b] using `steps` subdivisions.
 pub fn integrate<T>(f: &T, a: f64, b: f64, steps: usize) -> T::Output
 where
     T: Integrable,
@@ -29,6 +35,7 @@ where
     total    
 }
 
+// Integrate a function `f` over the interval [a, b] using 5-point Gauss-Legendre quadrature.
 fn integrate_step<T>(f: &T, a: f64, b: f64) -> T::Output
 where
     T: Integrable,
@@ -75,25 +82,26 @@ mod tests {
 
     #[test]
     fn test_integrate_gauss_quadrature_core() {
-        // Teste base: Polinômio de grau 9 deve ser exato (limite da máquina)
-        // f(x) = x^9 -> integral de -1 a 1 é 0
+        // Baseline check: a degree-9 polynomial should be integrated exactly
+        // by 5-point Gauss-Legendre on [-1, 1] (up to floating-point roundoff).
+        // f(x) = x^9 -> integral from -1 to 1 is 0.
         let result = quadrature(&|x: f64| x.powi(9));
         assert!(result.abs() < 1e-15);
 
-        // f(x) = x^8 -> integral de -1 a 1 é 2/9
+        // f(x) = x^8 -> integral from -1 to 1 is 2/9.
         let result = quadrature(&|x: f64| x.powi(8));
         assert!((result - 2.0 / 9.0).abs() < 1e-15);
     }
 
     #[test]
     fn test_integrate_step_real() {
-        // f(x) = cos(x) em [-pi/2, pi/2] -> deve ser 2.0
-        // Com 1 step (5 pontos), o erro do cosseno fica em torno de 1e-7 a 1e-6
+        // f(x) = cos(x) on [-pi/2, pi/2] -> expected integral is 2.0.
+        // With one 5-point panel, the cosine error is typically around 1e-7 to 1e-6.
         let result = integrate_step(&|x: f64| x.cos(), -PI / 2.0, PI / 2.0);
         assert!((result - 2.0).abs() < 5e-7);
 
-        // f(x) = x^2 em [0, 3] -> deve ser 9.0
-        // Como é polinômio de grau 2, deve ser exato
+        // f(x) = x^2 on [0, 3] -> expected integral is 9.0.
+        // Degree-2 polynomial, so this rule should be exact here.
         let result = integrate_step(&|x: f64| x * x, 0.0, 3.0);
         assert!((result - 9.0).abs() < 1e-14);
     }
@@ -104,21 +112,22 @@ mod tests {
         let b = PI / 2.0;
         let target = 2.0;
 
-        // Com 1 step: erro esperado ~1e-7 a 1e-6
+        // With one panel, expected error is about 1e-7 to 1e-6.
         let res1 = integrate(&|x: f64| x.cos(), a, b, 1);
         
-        // Com 6-8 steps: deve chegar no limite da precisão f64 (~1e-15)
+        // With 6-8 panels, this should approach f64 precision limits.
         let res8 = integrate(&|x: f64| x.cos(), a, b, 8);
         
         assert!((res1 - target).abs() < 5e-7);
-        assert!((res8 - target).abs() < 1e-14); // Evitando 1e-16 por segurança contra ruído
+        // Keep tolerance slightly above machine epsilon to avoid flaky failures.
+        assert!((res8 - target).abs() < 1e-14);
     }
 
     #[test]
     fn test_integrate_complex_integration() {
-        // No MiniNEC você terá f(x) = e^(-jkx)
-        // Vamos testar integral de e^(i*x) de 0 a PI
-        // Integral de e^(ix) = -i * e^(ix) |_0^PI = -i(e^(i*PI) - e^0) = -i(-1 - 1) = 2i
+        // In MiniNEC, kernels often look like f(x) = e^(-j k x).
+        // Here we test integral of e^(i x) from 0 to PI.
+        // Integral of e^(i x) = -i * e^(i x) |0^PI = -i(e^(i PI) - e^0) = 2i.
         
         let k = 1.0;
         let kernel = |x: f64| {
@@ -134,7 +143,7 @@ mod tests {
 
     #[test]
     fn test_integrate_struct_as_integrable() {
-        // Exemplo de como você usará no MiniNEC
+        // Example of using a custom struct as an Integrable kernel.
         struct MyKernel { frequency_factor: f64 }
         
         impl Integrable for MyKernel {
@@ -147,7 +156,7 @@ mod tests {
         let my_k = MyKernel { frequency_factor: 1.0 };
         let result = integrate(&my_k, 0.0, PI, 4);
         
-        // integral de cos(x) de 0 a PI é 0
+        // Integral of cos(x) from 0 to PI is 0.
         assert!(result.abs() < 1e-14);
     }
 }
