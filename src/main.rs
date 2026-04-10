@@ -1,34 +1,24 @@
-use std::fs;
-use vector3::Vector3;
-use serde::Deserialize;
+mod geometry;
+mod quadrature;
 
-#[derive(Deserialize,Debug)]
-struct Point {
-    x:f64,
-    y:f64,
-    z:f64
-}
-
-#[derive(Deserialize,Debug)]
-struct Wire {
-    start: Point,
-    end: Point,
-    diameter: f64
-}
-
-#[derive(Deserialize, Debug)]
-struct Antenna {
-    wires: Vec<Wire>,
-    ground: String
-}
 
 fn main() {
     println!("Hello, world!");
 
+    let antenna = geometry::read_antenna_from_file("TestData/antenna.json");
+    println!("{:#?}", antenna);
+    
+    test_quadrature();
 
-    let contents = fs::read_to_string("TestData/antenna.json")
-        .expect("Should have been able to read the file");
+}
 
-    let antenna: Antenna=serde_json::from_str(&contents).expect("Should have been able to read Antenna");
-    println!("{:?}",antenna);
+fn test_quadrature() {
+    let pi = std::f64::consts::PI;
+
+    let x: f64 = 3.0; // This is just to show the expected value of the integral
+    let result = quadrature::integrate(|x| x * x, 0.0, x);
+    println!("Integral of x^2 from 0 to {} is approximately: {}, and it should be close to {}", x, result, x.powi(3) / 3.0);
+
+    let result = quadrature::gauss_quadrature(|x| (x * pi/2.0).cos()*pi/2.0);
+    println!("Integral of cos(x * pi/2)*pi/2 from -1 to 1 is approximately: {}, and it should be close to {}", result, 2.0 * (pi/2.0).sin()); 
 }
