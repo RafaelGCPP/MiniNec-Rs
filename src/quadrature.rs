@@ -1,6 +1,6 @@
 
 // 5 point Gauss-Legendre quadrature in the interval [-1, 1]
-pub fn gauss_quadrature<F>(f: F) -> f64
+fn gauss_quadrature<F>(f: F) -> f64
 where
     F: Fn(f64) -> f64,
 {
