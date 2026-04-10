@@ -1,6 +1,5 @@
 mod geometry;
-mod quadrature;
-
+mod integrate;
 
 fn main() {
     println!("Hello, world!");
