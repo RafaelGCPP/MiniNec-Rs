@@ -238,7 +238,7 @@ potentials independently, making it easier to solve electromagnetic problems. Th
 potentials can be solved using various methods, including the Green's function approach, which provides a systematic 
 way to find the solutions for arbitrary source distributions.
 
-## Green's Function Solution for the Wave Equations
+### Green's Function Solution for the Wave Equations
 The Green's function is a powerful mathematical tool used to solve inhomogeneous differential equations,
 such as the wave equations for the vector and scalar potentials. The Green's function represents the
 response of the system to a point impulse source, and it can be used to construct the solution for any arbitrary
