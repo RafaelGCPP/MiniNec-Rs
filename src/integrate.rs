@@ -1,6 +1,15 @@
 
 // Gauss-Legendre quadrature integration module.
 
+/// Nodes (abscissas) and weights of the 5-point Gauss-Legendre quadrature in the interval [-1, 1].
+/// Each tuple contains (node, weight) for efficient paired access during integration.
+const GAUSS_LEGENDRE_POINTS: [(f64, f64); 5] = [
+    (-0.906179845938664, 0.236926885056189), // -1/3 * sqrt(5 + 2 * sqrt(10 / 7)), (322 - 13 * sqrt(70)) / 900
+    (-0.538469310105683, 0.478628670499366), // -1/3 * sqrt(5 - 2 * sqrt(10 / 7)), (322 + 13 * sqrt(70)) / 900
+    (0.0, 0.568888888888889),                 // 0, 128/225
+    (0.538469310105683, 0.478628670499366),  // 1/3 * sqrt(5 - 2 * sqrt(10 / 7)), (322 + 13 * sqrt(70)) / 900
+    (0.906179845938664, 0.236926885056189),  // 1/3 * sqrt(5 + 2 * sqrt(10 / 7)), (322 - 13 * sqrt(70)) / 900
+];
 
 // Integrable trait is a general interface for any function or struct that can be evaluated at a point.
 pub trait Integrable {
@@ -23,7 +32,7 @@ where F: Fn(f64) -> Out
 pub fn integrate<T>(f: &T, a: f64, b: f64, steps: usize) -> T::Output
 where
     T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + Default + Copy,
+    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
 {
     let mut total = T::Output::default();
     let step_size = (b - a) / steps as f64;
@@ -36,10 +45,11 @@ where
 }
 
 // Integrate a function `f` over the interval [a, b] using 5-point Gauss-Legendre quadrature.
+#[inline]
 fn integrate_step<T>(f: &T, a: f64, b: f64) -> T::Output
 where
     T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + Default + Copy,
+    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
 {
     let c1 = (b - a) / 2.0;
     let c2 = (b + a) / 2.0;
@@ -47,31 +57,16 @@ where
 }
 
 // 5 point Gauss-Legendre quadrature in the interval [-1, 1]
+#[inline]
 fn quadrature<T>(f: &T) -> T::Output
 where
     T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + Default + Copy,
+    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
 {
-    let x = [
-        -0.906179845938664, // -1/3 * sqrt(5 + 2 * sqrt(10 / 7))
-        -0.538469310105683, // -1/3 * sqrt(5 - 2 * sqrt(10 / 7))
-        0.0,
-        0.538469310105683, // 1/3 * sqrt(5 - 2 * sqrt(10 / 7))
-        0.906179845938664, // 1/3 * sqrt(5 + 2 * sqrt(10 / 7))
-    ];
-    let w = [
-        0.236926885056189, // (322 - 13 * sqrt(70)) / 900
-        0.478628670499366, // (322 + 13 * sqrt(70)) / 900
-        0.568888888888889, // 128/225
-        0.478628670499366, // (322 + 13 * sqrt(70)) / 900
-        0.236926885056189, // (322 - 13 * sqrt(70)) / 900
-    ];
-
-    let mut sum = T::Output::default();
-    for i in 0..5 {
-        sum += f.eval(x[i]) * w[i];
-    }
-    sum 
+    GAUSS_LEGENDRE_POINTS.iter()
+        .fold(T::Output::default(), |sum, (x, w)| {
+            sum + f.eval(*x) * *w
+        })
 }
 
 #[cfg(test)]
