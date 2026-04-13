@@ -1,4 +1,4 @@
-**NOTE:** In spite of my best efforts, GitHub cannot render this document correctly. 
+**Note:** Due to GitHub's Markdown engine limitations, and in spite of my best efforts, some complex mathematical expressions may not render correctly. For the full experience, cloning the repo and using a dedicated LaTeX/Markdown viewer is recommended.
 
 # MiniNEC Algorithm
 
