@@ -39,7 +39,8 @@
       "id": "source1",
       "wire_id": "wire1",
       "position": "Center",
-      "amplitude": 1.0
+      "amplitude": 1.0,
+      "phase": 0.0
     }
   ]
 }
