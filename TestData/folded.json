@@ -1,0 +1,31 @@
+{
+  "wires":[
+    {
+      "id": "wire1",
+      "start":[ -2.5, 0, 0 ],
+      "end": [ 2.5, 0, 0 ],
+      "diameter":0.1
+    },
+    {
+      "id": "wire2",
+      "start":[ -2.5, 0, 0.1 ],
+      "end": [ 2.5, 0, 0.1 ],
+      "diameter":0.1
+    },
+    {
+      "id": "wire3",
+      "start":[ -2.5, 0, 0 ],
+      "end": [ -2.5, 0, 0.1 ],
+      "diameter":0.1
+    },
+    {
+      "id": "wire4",
+      "start":[ 2.5, 0, 0 ],
+      "end": [ 2.5, 0, 0.1 ],
+      "diameter":0.1
+    }
+  ],
+  "added_height": 10,
+  "ground": "FreeSpace",
+  "frequency": 30e6
+}
