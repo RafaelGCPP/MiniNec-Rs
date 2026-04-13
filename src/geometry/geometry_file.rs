@@ -32,17 +32,27 @@ pub(super) enum GroundType {
 /// Source
 #[derive(Deserialize, Debug)]
 pub(super) struct Source {
+    /// Source id
     pub(super) id: String,
+    /// ID of the wire where the source is located
     pub(super) wire_id: String,
+    /// Position on the wire
     pub(super) position: SourcePosition,
+    /// Voltage amplitude
     pub(super) amplitude: f64,
+    /// Source phase
+    pub(super) phase: f64,
 }
 
+/// Position of a source relative to a wire
 #[derive(Deserialize, Debug)]
 pub(super) enum SourcePosition {
+    /// starting node
     Start,
+    /// midpoint
     Center,
-    EndPoint
+    /// ending node
+    End
 }
 
 /// Represents the antenna geometry and simulation parameters loaded from a JSON file.
