@@ -10,3 +10,4 @@ num-complex = "0.4.6"
 nalgebra = { version = "0.34.2", features = ["serde-serialize"] }
 approx = { version = "0.5.1", features = ["num-complex"] }
 thiserror = "2.0.18"
+physical_constants = "0.5.0"
