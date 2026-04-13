@@ -533,7 +533,7 @@ where $r'_{j \pm 1/2}$ represents the midpoints of the segments adjacent to node
 ```math
 \Phi_j(\mathbf{r}) = \frac{j}{4\pi \varepsilon_0 \omega} \int_L \left[ \delta(r' - r'_{j-1/2}) - \delta(r' - r'_{j+1/2}) \right] \frac{e^{-jk|\mathbf{r} - \mathbf{r}'|}}{|\mathbf{r} - \mathbf{r}'|} dr'.
 ```
-Due to the sifting property of the Dirac delta, the integral collapses into the difference of the Green's function evaluated at the two midpoints:
+Due to the shifting property of the Dirac delta, the integral collapses into the difference of the Green's function evaluated at the two midpoints:
 ```math
 \Phi_j(\mathbf{r}) = \frac{j}{4\pi \varepsilon_0 \omega} \left[ G(\mathbf{r}, \mathbf{r}_{j-1/2}) - G(\mathbf{r}, \mathbf{r}_{j+1/2}) \right],
 ```
