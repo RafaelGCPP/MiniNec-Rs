@@ -2,6 +2,7 @@
 use nalgebra::Point3;
 use serde::Deserialize;
 use std::fs;
+use num_complex::Complex;
 use thiserror::Error;
 
 /// Represents a single wire element in the antenna geometry.
