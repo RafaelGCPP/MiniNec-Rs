@@ -35,12 +35,18 @@ pub struct Antenna {
     pub wire_map: HashMap<String, WireMetadata>,
 }
 
+/// Segment representation
 #[derive(Clone, Debug)]
 pub struct Segment {
+    /// start and end node indices
     pub nodes: (usize, usize),
+    /// midpoint of the segment, used for field evaluation
     pub midpoint: Point3<f64>,
+    /// radius of the wire at the segment
     pub radius: f64,
+    /// segment length
     pub length: f64,
+    /// direction vector
     pub unit_vector: Vector3<f64>,
 }
 
