@@ -1,26 +1,26 @@
 #![allow(dead_code)]
-use thiserror::Error;
+use nalgebra::Point3;
 use serde::Deserialize;
 use std::fs;
-use nalgebra::Point3;
+use thiserror::Error;
 
 /// Represents a single wire element in the antenna geometry.
-#[derive(Deserialize,Debug)]
-struct Wire {
+#[derive(Deserialize, Debug)]
+pub(super) struct Wire {
     /// Unique identifier for the wire.
-    id: String,
+    pub(super) id: String,
     /// Start point of the wire in 3D space.
-    start: Point3<f64>,
+    pub(super) start: Point3<f64>,
     /// End point of the wire in 3D space.
-    end: Point3<f64>,
+    pub(super) end: Point3<f64>,
     /// Diameter of the wire in meters.
-    diameter: f64
+    pub(super) diameter: f64,
 }
 
 /// Supported Ground Types.
 
 #[derive(Deserialize, Debug)]
-pub enum GroundType {
+pub(super) enum GroundType {
     /// Free Space or no ground
     FreeSpace,
     /// Perfect Ground
@@ -31,15 +31,15 @@ pub enum GroundType {
 
 /// Represents the antenna geometry and simulation parameters loaded from a JSON file.
 #[derive(Deserialize, Debug)]
-pub struct AntennaFile {
+pub(super) struct AntennaFile {
     /// List of wires that make up the antenna.
-    wires: Vec<Wire>,
+    pub(super) wires: Vec<Wire>,
     /// Ground type or model (e.g., "free_space", "perfect_ground").
-    ground: GroundType,
+    pub(super) ground: GroundType,
     /// Simulation frequency in Hz.
-    frequency: f64,
+    pub(super) frequency: f64,
     /// Additional height above ground in meters.
-    added_height: f64,
+    pub(super) added_height: f64,
 }
 
 /// Errors that can occur when reading or parsing an antenna geometry file.
@@ -68,7 +68,7 @@ pub enum AntennaFileError {
 /// - `AntennaFileError::Json` if the file contents cannot be parsed as valid JSON.
 pub fn read_antenna_from_file(filename: &str) -> Result<AntennaFile, AntennaFileError> {
     let contents = fs::read_to_string(filename)?;
-    let antenna= serde_json::from_str(&contents)?;
+    let antenna = serde_json::from_str(&contents)?;
 
     Ok(antenna)
 }
@@ -84,7 +84,8 @@ mod tests {
 
         assert!(
             matches!(result, Err(AntennaFileError::Io(ref e)) if e.kind() == std::io::ErrorKind::NotFound),
-            "Should be Io(NotFound), but found: {:?}", result
+            "Should be Io(NotFound), but found: {:?}",
+            result
         );
     }
 
@@ -99,8 +100,9 @@ mod tests {
     fn antenna_file_json_error() {
         let result = read_antenna_from_file("TestData/error.json");
         assert!(
-            matches!(result, Err(AntennaFileError::Json(_)) ),
-            "Should be Json(), but found: {:?}", result
+            matches!(result, Err(AntennaFileError::Json(_))),
+            "Should be Json(), but found: {:?}",
+            result
         );
     }
 }
