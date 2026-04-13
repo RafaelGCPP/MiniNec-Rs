@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-vector3 = "2.0.1"
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
 num-complex = "0.4.6"
+nalgebra = { version = "0.34.2", features = ["serde-serialize"] }
+approx = { version = "0.5.1", features = ["num-complex"] }
+thiserror = "2.0.18"
