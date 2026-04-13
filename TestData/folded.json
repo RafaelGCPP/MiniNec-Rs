@@ -27,5 +27,13 @@
   ],
   "added_height": 10,
   "ground": "FreeSpace",
-  "frequency": 30e6
+  "frequency": 30e6,
+  "sources":[
+    {
+      "id": "source1",
+      "wire_id": "wire1",
+      "position": "Center",
+      "amplitude": 1.0
+    }
+  ]
 }

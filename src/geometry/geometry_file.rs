@@ -29,6 +29,22 @@ pub(super) enum GroundType {
     // MiniNec,
 }
 
+/// Source
+#[derive(Deserialize, Debug)]
+pub(super) struct Source {
+    pub(super) id: String,
+    pub(super) wire_id: String,
+    pub(super) position: SourcePosition,
+    pub(super) amplitude: f64,
+}
+
+#[derive(Deserialize, Debug)]
+pub(super) enum SourcePosition {
+    Start,
+    Center,
+    EndPoint
+}
+
 /// Represents the antenna geometry and simulation parameters loaded from a JSON file.
 #[derive(Deserialize, Debug)]
 pub(super) struct AntennaFile {
@@ -40,6 +56,8 @@ pub(super) struct AntennaFile {
     pub(super) frequency: f64,
     /// Additional height above ground in meters.
     pub(super) added_height: f64,
+    /// List of sources
+    pub(super) sources: Vec<Source>
 }
 
 /// Errors that can occur when reading or parsing an antenna geometry file.
