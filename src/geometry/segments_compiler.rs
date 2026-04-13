@@ -1,8 +1,10 @@
-use super::AntennaFile;
+use super::{AntennaFile, AntennaFileError, SourcePosition};
 use approx::relative_eq;
 use nalgebra::{Point3, Vector3};
 use physical_constants;
 use std::collections::HashMap;
+use num_complex::Complex;
+
 
 /// An antenna node composed by its coordinates and incidence
 #[derive(Clone, Copy, Debug)]
@@ -31,8 +33,11 @@ pub struct Antenna {
     pub nodes: Vec<Node>,
     /// Antenna segments
     pub segments: Vec<Segment>,
+    /// Voltage sources
+    pub sources: Vec<VoltageSource>,
     /// Map of wire metadata for each wire id
     pub wire_map: HashMap<String, WireMetadata>,
+
 }
 
 /// Segment representation
@@ -48,6 +53,12 @@ pub struct Segment {
     pub length: f64,
     /// direction vector
     pub unit_vector: Vector3<f64>,
+}
+
+#[derive(Clone, Debug)]
+pub struct VoltageSource {
+    pub node_index: usize,
+    pub voltage: Complex<f64>,
 }
 
 const C0: f64 = physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
@@ -112,9 +123,9 @@ fn segment_line(
         let idx_a = push_node(p_a, nodes);
         let idx_b = push_node(p_b, nodes);
 
-        let s_vector=p_b-p_a;
+        let s_vector = p_b - p_a;
         let segment = Segment {
-            nodes: (idx_a,idx_b),
+            nodes: (idx_a, idx_b),
             midpoint: nalgebra::center(&p_a, &p_b),
             radius,
             length: s_vector.norm(),
@@ -143,7 +154,7 @@ fn segment_line(
 ///
 /// # Returns
 /// An `Antenna` struct containing the nodes, segments, and wire metadata.
-fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Antenna {
+fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Result<Antenna, AntennaFileError> {
     let mut nodes = Vec::new();
     let mut segments = Vec::new();
     let mut wire_map = HashMap::new();
@@ -179,22 +190,36 @@ fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Anten
             middle_node: first_half.1, // should be the same as second_half.0
             last_node: second_half.1,
         };
-        println!(
-            "Inserting wire: id = {:?}, metadata = {:?}",
-            wire.id, wire_metadata
-        );
+
         wire_map.insert(wire.id.clone(), wire_metadata);
-        println!("Current wire_map state:");
-        for (k, v) in wire_map.iter() {
-            println!("  id = {:?}, metadata = {:?}", k, v);
-        }
     }
 
-    Antenna {
+    let mut sources = Vec::new(); // Placeholder for voltage sources, to be implemented later
+
+    for source in &file.sources {
+        let voltage = Complex::from_polar(source.amplitude, source.phase);
+        let wire_metadata = wire_map.get(&source.wire_id)
+            .ok_or_else(|| AntennaFileError::Compile(format!("Source references unknown wire id: {}", source.wire_id)))?;
+        let node_index=match source.position {
+            SourcePosition::Start=> wire_metadata.first_node,
+            SourcePosition::Center=> wire_metadata.middle_node,
+            SourcePosition::End=> wire_metadata.last_node,
+        };
+
+
+        let voltage_source = VoltageSource {
+            node_index,
+            voltage
+        };
+        sources.push(voltage_source);
+    }
+
+    Ok(Antenna {
         nodes,
         segments,
+        sources,
         wire_map,
-    }
+    })
 }
 
 #[cfg(test)]
@@ -204,8 +229,12 @@ mod tests {
 
     #[test]
     fn test_compile_geometry_file_dipole() {
-        let file = read_antenna_from_file("TestData/antenna.json").unwrap();
+        let file = read_antenna_from_file("TestData/antenna.json");
+        assert!(file.is_ok());
+        let file = file.unwrap();
         let antenna = compile_geometry_file(&file, 20.0);
+        assert!(antenna.is_ok());
+        let antenna = antenna.unwrap();
 
         assert_eq!(antenna.wire_map.len(), 1); // There is only one wire in the test file
         assert_eq!(antenna.nodes.len(), 13); // There should be 13 nodes
@@ -224,9 +253,27 @@ mod tests {
     }
 
     #[test]
-    fn test_compile_geometry_file_folded_dipole() {
-        let file = read_antenna_from_file("TestData/folded.json").unwrap();
+    fn test_compile_geometry_file_bad_source() {
+        let file = read_antenna_from_file("TestData/badsource.json");
+        assert!(file.is_ok());
+        let file = file.unwrap();
+
         let antenna = compile_geometry_file(&file, 20.0);
+        assert!(
+            matches!(antenna, Err(AntennaFileError::Compile(_))),
+            "Should be Compile(), but found: {:?}",
+            antenna
+        );
+    }
+
+    #[test]
+    fn test_compile_geometry_file_folded_dipole() {
+        let file = read_antenna_from_file("TestData/folded.json");
+        assert!(file.is_ok());
+        let file = file.unwrap();
+        let antenna = compile_geometry_file(&file, 20.0);
+        assert!(antenna.is_ok());
+        let antenna = antenna.unwrap();
 
         assert_eq!(antenna.wire_map.len(), 4); // There is 4 wires in the test file
         assert_eq!(antenna.nodes.len(), 28); // There should be 28 nodes
@@ -241,8 +288,12 @@ mod tests {
     }
     #[test]
     fn test_compile_geometry_file_vertical() {
-        let file = read_antenna_from_file("TestData/vertical.json").unwrap();
+        let file = read_antenna_from_file("TestData/vertical.json");
+        assert!(file.is_ok());
+        let file=file.unwrap();
         let antenna = compile_geometry_file(&file, 20.0);
+        assert!(antenna.is_ok());
+        let antenna=antenna.unwrap();
 
         assert_eq!(antenna.wire_map.len(), 5); // There is 4 wires in the test file
         assert_eq!(antenna.nodes.len(), 23); // There should be 28 nodes

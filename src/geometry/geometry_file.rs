@@ -2,7 +2,7 @@
 use nalgebra::Point3;
 use serde::Deserialize;
 use std::fs;
-use thiserror::Error;
+use super::AntennaFileError;
 
 /// Represents a single wire element in the antenna geometry.
 #[derive(Deserialize, Debug)]
@@ -70,17 +70,7 @@ pub(super) struct AntennaFile {
     pub(super) sources: Vec<Source>
 }
 
-/// Errors that can occur when reading or parsing an antenna geometry file.
-#[derive(Error, Debug)]
-pub enum AntennaFileError {
-    /// File read error (e.g., file not found, permission denied).
-    #[error("Erro de leitura de arquivo: {0}")]
-    Io(#[from] std::io::Error),
 
-    /// JSON parse error (invalid or malformed file contents).
-    #[error("Erro de parse JSON: {0}")]
-    Json(#[from] serde_json::Error),
-}
 
 /// Reads and parses an antenna geometry description from a JSON file.
 ///
@@ -106,7 +96,7 @@ mod tests {
     use super::*;
 
     #[test]
-    // Checks that reading a non-existant file returns an Io(NotFound) error.
+    // Checks that reading a non-existent file returns an Io(NotFound) error.
     fn antenna_file_not_exist() {
         let result = read_antenna_from_file("TestData/xantenna.json");
 
