@@ -4,6 +4,7 @@ use super::AntennaFile;
 use nalgebra::Point3;
 use physical_constants;
 
+/// An antenna node composed by its coordinates and incidence
 #[derive(Clone, Copy, Debug)]
 pub struct Node {
     /// Node coordinate
@@ -12,17 +13,25 @@ pub struct Node {
     incidence: usize,
 }
 
+/// The wire metadata, pointing at which nodes the wire starts, ends and its middle point (used for feeding).
 #[derive(Clone, Copy, Debug)]
 pub struct WireMetadata {
+    /// Index of the first node of the wire
     pub first_node: usize,
+    /// Index of the center node of the wire
     pub middle_node: usize,
+    /// Index of the last node of the wire
     pub last_node: usize,
 }
 
+/// Antenna representation composed by its nodes, segments and a map of wire metadata for each wire id.
 #[derive(Clone, Debug)]
 pub struct Antenna {
+    /// Antenna node list
     pub nodes: Vec<Node>,
+    /// Antenna segments
     pub segments: Vec<Segment>,
+    /// Map of wire metadata for each wire id
     pub wire_map: HashMap<String, WireMetadata>,
 }
 
@@ -103,6 +112,15 @@ fn segment_line(
     (first_node_idx.unwrap(), last_node_idx)
 }
 
+/// Compiles the antenna description returning an antenna abstraction with nodes and segments.
+///
+/// # Parameters
+/// - `file`: A reference to the `AntennaFile` object read from the JSON file
+/// - `segment_size_divider`: A factor that determines the segment size as a fraction of the wavelength (lambda).
+///                           For example, if set to 20, the segment size will be lambda/20.
+///
+/// # Returns
+/// An `Antenna` struct containing the nodes, segments, and wire metadata.
 fn compile_geometry_file(file: &AntennaFile, segment_size_divider:f64) -> Antenna {
     let mut nodes = Vec::new();
     let mut segments = Vec::new();
