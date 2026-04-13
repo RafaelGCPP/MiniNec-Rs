@@ -1,7 +1,8 @@
-mod geometry_file;
-mod integrate;
 
-use geometry_file::*;
+mod integrate;
+mod geometry;   
+
+use geometry::*;
 
 fn main() {
     println!("Hello, world!");

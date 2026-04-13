@@ -1,10 +1,13 @@
 {
   "wires":[
     {
-      "start":[ 10, 10, 10 ],
-      "end": [ 20, 20, 20 ],
+      "id": "wire1",
+      "start":[ -2.5, 0, 0 ],
+      "end": [ 2.5, 0, 0 ],
       "diameter":0.1
     }
   ],
-  "ground": "none"
+  "added_height": 10,
+  "ground": "FreeSpace",
+  "frequency": 30e6
 }
