@@ -1,3 +1,5 @@
+**NOTE:** In spite of my best efforts, GitHub cannot render this document correctly. 
+
 # MiniNEC Algorithm
 
 ## Introduction
