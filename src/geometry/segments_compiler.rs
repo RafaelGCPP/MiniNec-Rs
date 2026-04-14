@@ -7,12 +7,14 @@ use num_complex::Complex;
 
 
 /// An antenna node composed by its coordinates and incidence
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Node {
     /// Node coordinate
     p: Point3<f64>,
     /// Number of segments connecting
     incidence: usize,
+    /// List of connecting segments
+    segments: Vec<usize>,
 }
 
 /// The wire metadata, pointing at which nodes the wire starts, ends and its middle point (used for feeding).
@@ -55,6 +57,23 @@ pub struct Segment {
     pub unit_vector: Vector3<f64>,
 }
 
+/// Current pulse structure for Z matrix
+#[derive(Clone, Debug)]
+pub struct Pulse {
+    /// Node at the center of the pulse
+    pub center_node: usize,
+    /// Incoming segment
+    pub seg_in: usize,
+    /// Outgoing segment
+    pub seg_out: usize,
+    /// pulse length
+    pub total_length: f64,
+    /// unit vector for the incoming segment
+    pub unit_in: Vector3<f64>,
+    /// unit vector for the outgoing segment
+    pub unit_out: Vector3<f64>,
+}
+
 #[derive(Clone, Debug)]
 pub struct VoltageSource {
     pub node_index: usize,
@@ -78,7 +97,7 @@ fn push_node(p: Point3<f64>, nodes: &mut Vec<Node>) -> usize {
         nodes[pos].incidence += 1;
         pos
     } else {
-        let new_node = Node { p: p, incidence: 1 };
+        let new_node = Node { p, incidence: 1, segments: Vec::new() };
         nodes.push(new_node);
         nodes.len() - 1
     }
@@ -133,6 +152,11 @@ fn segment_line(
         };
 
         segments.push(segment);
+
+        // Reverse link, used for pulse generation
+        let idx_seg=segments.len()-1;
+        nodes[idx_a].segments.push(idx_seg);
+        nodes[idx_b].segments.push(idx_seg);
 
         // Captures the first node
         if i == 0 {
@@ -214,6 +238,10 @@ fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Resul
         sources.push(voltage_source);
     }
 
+
+
+
+
     Ok(Antenna {
         nodes,
         segments,
@@ -248,6 +276,12 @@ mod tests {
                 antenna.nodes[i].incidence, 2,
                 "Node {} has incidence {}, expected 2",
                 i, antenna.nodes[i].incidence
+            );
+
+            assert_eq!(
+                antenna.nodes[i].segments.len(), 2,
+                "Node {} has {} segments connected, expected {}",
+                i, antenna.nodes[i].segments.len(), 2
             );
         }
     }
@@ -284,6 +318,12 @@ mod tests {
                 "Node {} has incidence {}, expected 2",
                 i, antenna.nodes[i].incidence
             );
+
+            assert_eq!(
+                antenna.nodes[i].segments.len(), 2,
+                "Node {} has {} segments connected, expected {}",
+                i, antenna.nodes[i].segments.len(), 2
+            );
         }
     }
     #[test]
@@ -308,8 +348,14 @@ mod tests {
             }
             assert_eq!(
                 antenna.nodes[i].incidence, incidence,
-                "Node {} has incidence {}, expected 2",
-                i, antenna.nodes[i].incidence
+                "Node {} has incidence {}, expected {}",
+                i, antenna.nodes[i].incidence, incidence
+            );
+
+            assert_eq!(
+                antenna.nodes[i].segments.len(), incidence,
+                "Node {} has {} segments connected, expected {}",
+                i, antenna.nodes[i].segments.len(), incidence
             );
         }
     }
