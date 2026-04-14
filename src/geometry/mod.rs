@@ -1,9 +1,10 @@
 mod geometry_file;
 mod segments_compiler;
+mod pulse_compiler;
+mod model;
 
-use geometry_file::{AntennaFile, SourcePosition, read_antenna_from_file};
+use model::*;
 use thiserror::Error;
-
 
 /// Errors that can occur when reading or parsing an antenna geometry file.
 #[derive(Error, Debug)]

@@ -1,80 +1,9 @@
-use super::{AntennaFile, AntennaFileError, SourcePosition};
+use super::*;
 use approx::relative_eq;
-use nalgebra::{Point3, Vector3};
+use nalgebra::Point3;
 use num_complex::Complex;
 use physical_constants;
 use std::collections::HashMap;
-
-/// An antenna node composed by its coordinates and incidence
-#[derive(Clone, Debug)]
-pub struct Node {
-    /// Node coordinate
-    p: Point3<f64>,
-    /// List of connecting segments
-    segments: Vec<usize>,
-}
-
-/// The wire metadata, pointing at which nodes the wire starts, ends and its middle point (used for feeding).
-#[derive(Clone, Copy, Debug)]
-pub struct WireMetadata {
-    /// Index of the first node of the wire
-    pub first_node: usize,
-    /// Index of the center node of the wire
-    pub middle_node: usize,
-    /// Index of the last node of the wire
-    pub last_node: usize,
-}
-
-/// Antenna representation composed by its nodes, segments and a map of wire metadata for each wire id.
-#[derive(Clone, Debug)]
-pub struct Antenna {
-    /// Antenna node list
-    pub nodes: Vec<Node>,
-    /// Antenna segments
-    pub segments: Vec<Segment>,
-    /// Voltage sources
-    pub sources: Vec<VoltageSource>,
-    /// Map of wire metadata for each wire id
-    pub wire_map: HashMap<String, WireMetadata>,
-}
-
-/// Segment representation
-#[derive(Clone, Debug)]
-pub struct Segment {
-    /// start and end node indices
-    pub nodes: (usize, usize),
-    /// midpoint of the segment, used for field evaluation
-    pub midpoint: Point3<f64>,
-    /// radius of the wire at the segment
-    pub radius: f64,
-    /// segment length
-    pub length: f64,
-    /// direction vector
-    pub unit_vector: Vector3<f64>,
-}
-
-/// Current pulse structure for Z matrix
-#[derive(Clone, Debug)]
-pub struct Pulse {
-    /// Node at the center of the pulse
-    pub center_node: usize,
-    /// Incoming segment
-    pub seg_in: usize,
-    /// Outgoing segment
-    pub seg_out: usize,
-    /// pulse length
-    pub total_length: f64,
-    /// unit vector for the incoming segment
-    pub unit_in: Vector3<f64>,
-    /// unit vector for the outgoing segment
-    pub unit_out: Vector3<f64>,
-}
-
-#[derive(Clone, Debug)]
-pub struct VoltageSource {
-    pub node_index: usize,
-    pub voltage: Complex<f64>,
-}
 
 const C0: f64 = physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
 
@@ -176,7 +105,7 @@ fn segment_line(
 ///
 /// # Returns
 /// An `Antenna` struct containing the nodes, segments, and wire metadata.
-fn compile_geometry_file(
+pub fn compile_geometry_file(
     file: &AntennaFile,
     segment_size_divider: f64,
 ) -> Result<Antenna, AntennaFileError> {
@@ -219,6 +148,28 @@ fn compile_geometry_file(
         wire_map.insert(wire.id.clone(), wire_metadata);
     }
 
+    let sources = collect_sources(&file, &mut wire_map)?;
+
+    Ok(Antenna {
+        nodes,
+        segments,
+        sources,
+        wire_map,
+    })
+}
+
+/// Extracts sources from the antenna file struct and assigns them to nodes.
+///
+/// # Parameters
+/// - `file`: A reference to the `AntennaFile` object read from the JSON file
+/// - `wire_map`: A mutable reference to the wire metadata map, used to find the node indices for the sources.
+///
+/// # Returns
+/// An `Antenna` struct containing the nodes, segments, and wire metadata.
+fn collect_sources(
+    file: &&AntennaFile,
+    wire_map: &mut HashMap<String, WireMetadata>,
+) -> Result<Vec<VoltageSource>, AntennaFileError> {
     let mut sources = Vec::new(); // Placeholder for voltage sources, to be implemented later
 
     for source in &file.sources {
@@ -241,19 +192,13 @@ fn compile_geometry_file(
         };
         sources.push(voltage_source);
     }
-
-    Ok(Antenna {
-        nodes,
-        segments,
-        sources,
-        wire_map,
-    })
+    Ok(sources)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::read_antenna_from_file;
+    use super::geometry_file::read_antenna_from_file;
 
     #[test]
     fn test_compile_geometry_file_dipole() {
