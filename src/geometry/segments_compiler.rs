@@ -1,18 +1,15 @@
 use super::{AntennaFile, AntennaFileError, SourcePosition};
 use approx::relative_eq;
 use nalgebra::{Point3, Vector3};
+use num_complex::Complex;
 use physical_constants;
 use std::collections::HashMap;
-use num_complex::Complex;
-
 
 /// An antenna node composed by its coordinates and incidence
 #[derive(Clone, Debug)]
 pub struct Node {
     /// Node coordinate
     p: Point3<f64>,
-    /// Number of segments connecting
-    incidence: usize,
     /// List of connecting segments
     segments: Vec<usize>,
 }
@@ -39,7 +36,6 @@ pub struct Antenna {
     pub sources: Vec<VoltageSource>,
     /// Map of wire metadata for each wire id
     pub wire_map: HashMap<String, WireMetadata>,
-
 }
 
 /// Segment representation
@@ -94,10 +90,12 @@ const C0: f64 = physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
 /// The index of the existing or newly inserted node in the vector.
 fn push_node(p: Point3<f64>, nodes: &mut Vec<Node>) -> usize {
     if let Some(pos) = nodes.iter().position(|n| relative_eq!(n.p, p)) {
-        nodes[pos].incidence += 1;
         pos
     } else {
-        let new_node = Node { p, incidence: 1, segments: Vec::new() };
+        let new_node = Node {
+            p,
+            segments: Vec::new(),
+        };
         nodes.push(new_node);
         nodes.len() - 1
     }
@@ -154,7 +152,7 @@ fn segment_line(
         segments.push(segment);
 
         // Reverse link, used for pulse generation
-        let idx_seg=segments.len()-1;
+        let idx_seg = segments.len() - 1;
         nodes[idx_a].segments.push(idx_seg);
         nodes[idx_b].segments.push(idx_seg);
 
@@ -178,7 +176,10 @@ fn segment_line(
 ///
 /// # Returns
 /// An `Antenna` struct containing the nodes, segments, and wire metadata.
-fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Result<Antenna, AntennaFileError> {
+fn compile_geometry_file(
+    file: &AntennaFile,
+    segment_size_divider: f64,
+) -> Result<Antenna, AntennaFileError> {
     let mut nodes = Vec::new();
     let mut segments = Vec::new();
     let mut wire_map = HashMap::new();
@@ -222,25 +223,24 @@ fn compile_geometry_file(file: &AntennaFile, segment_size_divider: f64) -> Resul
 
     for source in &file.sources {
         let voltage = Complex::from_polar(source.amplitude, source.phase);
-        let wire_metadata = wire_map.get(&source.wire_id)
-            .ok_or_else(|| AntennaFileError::Compile(format!("Source references unknown wire id: {}", source.wire_id)))?;
-        let node_index=match source.position {
-            SourcePosition::Start=> wire_metadata.first_node,
-            SourcePosition::Center=> wire_metadata.middle_node,
-            SourcePosition::End=> wire_metadata.last_node,
+        let wire_metadata = wire_map.get(&source.wire_id).ok_or_else(|| {
+            AntennaFileError::Compile(format!(
+                "Source references unknown wire id: {}",
+                source.wire_id
+            ))
+        })?;
+        let node_index = match source.position {
+            SourcePosition::Start => wire_metadata.first_node,
+            SourcePosition::Center => wire_metadata.middle_node,
+            SourcePosition::End => wire_metadata.last_node,
         };
-
 
         let voltage_source = VoltageSource {
             node_index,
-            voltage
+            voltage,
         };
         sources.push(voltage_source);
     }
-
-
-
-
 
     Ok(Antenna {
         nodes,
@@ -267,21 +267,18 @@ mod tests {
         assert_eq!(antenna.wire_map.len(), 1); // There is only one wire in the test file
         assert_eq!(antenna.nodes.len(), 13); // There should be 13 nodes
         assert_eq!(antenna.segments.len(), 12); // There should be 13 segments
-        assert_eq!(antenna.nodes[0].incidence, 1); // the first node is open
-        assert_eq!(antenna.nodes[12].incidence, 1); // the last node is open
+        assert_eq!(antenna.nodes[0].segments.len(), 1); // the first node is open
+        assert_eq!(antenna.nodes[12].segments.len(), 1); // the last node is open
 
         // nodes 1..11 must have incidence 2
         for i in 1..11 {
             assert_eq!(
-                antenna.nodes[i].incidence, 2,
-                "Node {} has incidence {}, expected 2",
-                i, antenna.nodes[i].incidence
-            );
-
-            assert_eq!(
-                antenna.nodes[i].segments.len(), 2,
+                antenna.nodes[i].segments.len(),
+                2,
                 "Node {} has {} segments connected, expected {}",
-                i, antenna.nodes[i].segments.len(), 2
+                i,
+                antenna.nodes[i].segments.len(),
+                2
             );
         }
     }
@@ -314,15 +311,12 @@ mod tests {
         assert_eq!(antenna.segments.len(), 28); // There should be 28 segments
         for i in 0..27 {
             assert_eq!(
-                antenna.nodes[i].incidence, 2,
-                "Node {} has incidence {}, expected 2",
-                i, antenna.nodes[i].incidence
-            );
-
-            assert_eq!(
-                antenna.nodes[i].segments.len(), 2,
+                antenna.nodes[i].segments.len(),
+                2,
                 "Node {} has {} segments connected, expected {}",
-                i, antenna.nodes[i].segments.len(), 2
+                i,
+                antenna.nodes[i].segments.len(),
+                2
             );
         }
     }
@@ -330,10 +324,10 @@ mod tests {
     fn test_compile_geometry_file_vertical() {
         let file = read_antenna_from_file("TestData/vertical.json");
         assert!(file.is_ok());
-        let file=file.unwrap();
+        let file = file.unwrap();
         let antenna = compile_geometry_file(&file, 20.0);
         assert!(antenna.is_ok());
-        let antenna=antenna.unwrap();
+        let antenna = antenna.unwrap();
 
         assert_eq!(antenna.wire_map.len(), 5); // There is 4 wires in the test file
         assert_eq!(antenna.nodes.len(), 23); // There should be 28 nodes
@@ -346,16 +340,14 @@ mod tests {
             if (i == 6) || (i == 10) || (i == 14) || (i == 18) || (i == 22) {
                 incidence = 1;
             }
-            assert_eq!(
-                antenna.nodes[i].incidence, incidence,
-                "Node {} has incidence {}, expected {}",
-                i, antenna.nodes[i].incidence, incidence
-            );
 
             assert_eq!(
-                antenna.nodes[i].segments.len(), incidence,
+                antenna.nodes[i].segments.len(),
+                incidence,
                 "Node {} has {} segments connected, expected {}",
-                i, antenna.nodes[i].segments.len(), incidence
+                i,
+                antenna.nodes[i].segments.len(),
+                incidence
             );
         }
     }
