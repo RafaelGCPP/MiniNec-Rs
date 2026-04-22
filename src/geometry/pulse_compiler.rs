@@ -1,4 +1,3 @@
-use crate::geometry::segments_compiler::compile_geometry_file;
 use super::*;
 
 pub fn compile_pulses(antenna: &Antenna) -> Vec<Pulse> {
@@ -60,6 +59,7 @@ pub fn compile_pulses(antenna: &Antenna) -> Vec<Pulse> {
 mod tests {
     use super::*;
     use super::geometry_file::read_antenna_from_file;
+    use super::segments_compiler::compile_geometry_file;
 
 
     #[test]
