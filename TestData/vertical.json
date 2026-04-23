@@ -32,13 +32,13 @@
     }
   ],
   "added_height": 0,
-  "ground": "FreeSpace",
+  "ground": "free_space",
   "frequency": 30e6,
   "sources":[
     {
       "id": "source1",
       "wire_id": "wire1",
-      "position": "Start",
+      "position": "start",
       "amplitude": 1.0,
       "phase": 0.0
     }

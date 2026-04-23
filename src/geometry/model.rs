@@ -18,7 +18,8 @@ pub(crate) struct Wire {
 
 /// Supported Ground Types.
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum GroundType {
     /// Free Space or no ground
     FreeSpace,
@@ -44,7 +45,8 @@ pub(crate) struct Source {
 }
 
 /// Position of a source relative to a wire
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum SourcePosition {
     /// starting node
     Start,

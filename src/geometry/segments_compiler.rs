@@ -2,10 +2,10 @@ use super::*;
 use approx::relative_eq;
 use nalgebra::Point3;
 use num_complex::Complex;
-use physical_constants;
+use physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
 use std::collections::HashMap;
 
-const C0: f64 = physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
+const C0: f64 = SPEED_OF_LIGHT_IN_VACUUM;
 
 /// Searches for a node in the existing nodes vector that has approximately the same coordinate.
 /// If a close enough node is found (using relative_eq!), returns its index and increments its incidence count.
@@ -114,7 +114,7 @@ pub fn compile_geometry_file(
 
     let height = &file.added_height;
 
-    let lambda = C0 / &file.frequency;
+    let lambda = C0 / file.frequency;
     let segment_size = lambda / segment_size_divider;
 
     for wire in &file.wires {
@@ -138,10 +138,11 @@ pub fn compile_geometry_file(
             &mut nodes,
             &mut segments,
         );
-        let wire_nodes= Vec::from_iter(
-            first_half.iter()
-                .chain(second_half.iter().next()).cloned()
-        );
+        let wire_nodes = first_half
+            .iter()
+            .chain(second_half.iter().skip(1))
+            .copied()
+            .collect();
         let wire_metadata = WireMetadata {
             nodes: wire_nodes,
             middle_node: *first_half.last().unwrap(),
@@ -150,7 +151,7 @@ pub fn compile_geometry_file(
         wire_map.insert(wire.id.clone(), wire_metadata);
     }
 
-    let sources = collect_sources(&file, &mut wire_map, &nodes)?;
+    let sources = collect_sources(file, &wire_map, &nodes)?;
 
     Ok(Antenna {
         nodes,

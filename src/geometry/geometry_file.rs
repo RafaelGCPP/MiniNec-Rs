@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use super::*;
 use std::fs;
 
@@ -14,8 +13,8 @@ use std::fs;
 /// # Errors
 /// - `AntennaFileError::Io` if the file cannot be read (e.g., not found).
 /// - `AntennaFileError::Json` if the file contents cannot be parsed as valid JSON.
-pub fn read_antenna_from_file(filename: &str) -> Result<AntennaFile, AntennaFileError> {
-    let contents = fs::read_to_string(filename)?;
+pub fn read_antenna_from_file(path: impl AsRef<std::path::Path>) -> Result<AntennaFile, AntennaFileError> {
+    let contents = fs::read_to_string(path)?;
     let antenna = serde_json::from_str(&contents)?;
 
     Ok(antenna)
