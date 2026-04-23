@@ -323,7 +323,7 @@ mod tests {
     }
 
     #[test]
-    fn test_compile_geometry_file_endfed() {
+    fn test_compile_geometry_file_end_fed() {
         let file = read_antenna_from_file("TestData/endfed.json");
         assert!(file.is_ok());
         let file = file.unwrap();
@@ -350,6 +350,7 @@ mod tests {
         }
         assert_eq!(antenna.sources.len(), 1);
         assert_eq!(antenna.sources[0].node_index,1);
+        assert_eq!(antenna.nodes[antenna.sources[0].node_index].segments.len(), 2);
     }
 
 }
