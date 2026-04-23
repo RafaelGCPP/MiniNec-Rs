@@ -207,15 +207,18 @@ pub fn compile_geometry_file(
 fn collect_sources(
     file: &AntennaFile,
     wire_map: &HashMap<String, WireMetadata>,
-    nodes: &[Node]
-) -> Result<Vec<VoltageSource>, AntennaFileError> {
-    let mut sources = Vec::new();
+    nodes: &[Node],
+) -> Result<HashMap<usize, Complex<f64>>, AntennaFileError> {
+    let mut sources = HashMap::new();
 
     for source in &file.sources {
         let voltage = Complex::from_polar(source.amplitude, source.phase);
 
         let wire_metadata = wire_map.get(&source.wire_id).ok_or_else(|| {
-            AntennaFileError::Compile(format!("Source references unknown wire id: {}", source.wire_id))
+            AntennaFileError::Compile(format!(
+                "Source references unknown wire id: {}",
+                source.wire_id
+            ))
         })?;
 
         let node_index = match source.position {
@@ -230,7 +233,7 @@ fn collect_sources(
                 } else {
                     first_node
                 }
-            },
+            }
 
             SourcePosition::Center => wire_metadata.middle_node,
 
@@ -245,18 +248,18 @@ fn collect_sources(
                 } else {
                     last_node
                 }
-            },
+            }
         };
 
-        sources.push(VoltageSource { node_index, voltage });
+        sources.insert(node_index, voltage);
     }
     Ok(sources)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::geometry_file::read_antenna_from_file;
+    use super::*;
 
     #[test]
     fn test_compile_geometry_file_dipole() {
@@ -285,14 +288,13 @@ mod tests {
             );
         }
         assert_eq!(antenna.sources.len(), 1);
-        assert_eq!(antenna.sources[0].node_index,6);
+        assert_eq!(antenna.sources.keys().next().unwrap().clone(), 6);
 
         let wire = antenna.wire_map.get("wire1");
         assert!(wire.is_some(), "Expected wire1 in wire_map");
         let wire = wire.unwrap();
         let expected_nodes: Vec<usize> = (0..13).collect();
         assert_eq!(wire.nodes, expected_nodes);
-
     }
 
     #[test]
@@ -332,9 +334,7 @@ mod tests {
             );
         }
         assert_eq!(antenna.sources.len(), 1);
-        assert_eq!(antenna.sources[0].node_index,6);
-
-
+        assert_eq!(antenna.sources.keys().next().unwrap().clone(), 6);
     }
     #[test]
     fn test_compile_geometry_file_vertical() {
@@ -368,7 +368,7 @@ mod tests {
         }
 
         assert_eq!(antenna.sources.len(), 1);
-        assert_eq!(antenna.sources[0].node_index,0);
+        assert_eq!(antenna.sources.keys().next().unwrap().clone(), 0);
     }
 
     #[test]
@@ -398,8 +398,11 @@ mod tests {
             );
         }
         assert_eq!(antenna.sources.len(), 1);
-        assert_eq!(antenna.sources[0].node_index,11);
-        assert_eq!(antenna.nodes[antenna.sources[0].node_index].segments.len(), 2);
+        let source_node_index=antenna.sources.keys().next().unwrap().clone();
+        assert_eq!(source_node_index, 11);
+        assert_eq!(
+            antenna.nodes[source_node_index].segments.len(),
+            2
+        );
     }
-
 }

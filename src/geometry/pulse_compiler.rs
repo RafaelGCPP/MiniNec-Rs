@@ -1,6 +1,7 @@
+use num_complex::Complex64;
 use super::*;
 
-pub fn compile_pulses(antenna: &Antenna) -> Vec<Pulse> {
+pub fn compile_pulses(antenna: &Antenna) -> Result<Vec<Pulse>,AntennaFileError> {
     let mut pulses = Vec::new();
 
     let nodes = &antenna.nodes;
@@ -13,7 +14,6 @@ pub fn compile_pulses(antenna: &Antenna) -> Vec<Pulse> {
         }
 
         let seg_in = node.segments[0];
-        let center_node = i;
 
         // we need unit_in to point TO center_node
         let unit_in = {
@@ -41,17 +41,25 @@ pub fn compile_pulses(antenna: &Antenna) -> Vec<Pulse> {
             let seg_out_len=antenna.segments[seg_out].length;
             let total_length=(seg_in_len +seg_out_len)/2.0;
 
+            // Get the voltage source for the current node, or zero if none exists
+            // This ensures that only nodes with a defined voltage source get a nonzero value
+            let voltage_source = antenna.sources.get(&i)
+                .cloned()
+                .unwrap_or_else(|| Complex64::new(0.0, 0.0));
+
             pulses.push( Pulse {
-                center_node,
+                center_node_idx: i,
+                center_node: antenna.nodes[i].p,
                 seg_in,
                 seg_out,
                 total_length,
                 unit_in,
-                unit_out
+                unit_out,
+                voltage_source
             })
         }
     }
-    pulses
+    Ok(pulses)
 }
 
 
@@ -89,17 +97,24 @@ mod tests {
             );
         }
 
-        let pulses=compile_pulses(&antenna);
+        let pulses=compile_pulses(&antenna).unwrap();
 
         assert_eq!(pulses.len(),11); // 12 nodes create 11 pulses for the dipole
 
         for i in 0..11 {
             assert!( (pulses[i].total_length - (5.0/12.0)).abs() < 1e-6); // pulses have 5/12 m
-            assert_eq!(pulses[i].center_node, i+1); // the first node has incidence zero!
+            assert_eq!(pulses[i].center_node_idx, i+1); // the first node has incidence zero!
+            assert!( (pulses[i].center_node.x - ((i as f64)-5.0)*(5.0/12.0)).abs() < 1e-6); // pulses have 5/12 m
             assert_eq!(pulses[i].seg_in, i); // the pulse goes from the segment just before the node
             assert_eq!(pulses[i].seg_out, i+1); // to the segment just after the node!
             assert!((pulses[i].unit_in- pulses[i].unit_out).norm() <1e-6); // all pulses are collinear
+            if i!=5 {
+                assert!(pulses[i].voltage_source.norm()<1e-6); // only the middle pulse has a voltage source
+            } else {
+                assert!((pulses[i].voltage_source.norm()-1.0)<1e-6);
+            }
         }
+
     }
 
 /*

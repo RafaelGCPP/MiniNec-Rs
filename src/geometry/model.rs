@@ -96,8 +96,8 @@ pub(crate) struct Antenna {
     pub(crate) nodes: Vec<Node>,
     /// Antenna segments
     pub(crate) segments: Vec<Segment>,
-    /// Voltage sources
-    pub(crate) sources: Vec<VoltageSource>,
+    /// Voltage sources indexed by node
+    pub(crate) sources: HashMap<usize,Complex<f64>>,
     /// Map of wire metadata for each wire id
     pub(crate) wire_map: HashMap<String, WireMetadata>,
 }
@@ -117,21 +117,13 @@ pub(crate) struct Segment {
     pub(crate) unit_vector: Vector3<f64>,
 }
 
-/// Voltage source representation, composed by the node index where the source
-/// is applied and the complex voltage value.
-#[derive(Clone, Debug)]
-pub(crate) struct VoltageSource {
-    // Node index where the gap is present
-    pub(crate) node_index: usize,
-    // Complex voltage amplitude.
-    pub(crate) voltage: Complex<f64>,
-}
-
 /// Current pulse structure for Z matrix
 #[derive(Clone, Debug)]
 pub(crate) struct Pulse {
     /// Node at the center of the pulse
-    pub(crate) center_node: usize,
+    pub(crate) center_node_idx: usize,
+    /// Center node coordinate
+    pub(crate) center_node: Point3<f64>,
     /// Incoming segment
     pub(crate) seg_in: usize,
     /// Outgoing segment
@@ -142,4 +134,6 @@ pub(crate) struct Pulse {
     pub(crate) unit_in: Vector3<f64>,
     /// unit vector for the outgoing segment
     pub(crate) unit_out: Vector3<f64>,
+    /// voltage source at pulse
+    pub(crate) voltage_source: Complex<f64>,
 }
