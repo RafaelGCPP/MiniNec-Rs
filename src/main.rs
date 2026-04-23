@@ -1,14 +1,14 @@
 
-mod integrate;
 mod geometry;
+mod physics;
 
 use geometry::*;
 
 fn main() {
     println!("Hello, world!");
 
-    load_file("TestData/antenna.json").unwrap();
-    //println!("{:#?}", antenna);
+    let problem=load_file("TestData/antenna.json").unwrap();
+    println!("{:#?}", problem);
     
 }
 

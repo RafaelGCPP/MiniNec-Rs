@@ -1,7 +1,7 @@
 mod geometry_file;
 mod segments_compiler;
 mod pulse_compiler;
-mod model;
+pub(crate) mod model;
 
 use std::path::Path;
 use model::*;
@@ -25,14 +25,13 @@ pub enum AntennaFileError {
     Pulse(String),
 }
 
-pub fn load_file(path: impl AsRef<Path>) -> Result<(), AntennaFileError> {
+pub fn load_file(path: impl AsRef<Path>) -> Result<Problem, AntennaFileError> {
     let antenna_file=geometry_file::read_antenna_from_file(path)?;
     let antenna=segments_compiler::compile_geometry_file(&antenna_file,20.0)?;
     let pulses=pulse_compiler::compile_pulses(&antenna)?;
 
-    for p in pulses {
-        println!("{:?}",p);
-    }
-
-    Ok(())
+    Ok(Problem {
+        frequency: antenna_file.frequency,
+        pulses
+    })
 }

@@ -97,7 +97,7 @@ pub(crate) struct Antenna {
     /// Antenna segments
     pub(crate) segments: Vec<Segment>,
     /// Voltage sources indexed by node
-    pub(crate) sources: HashMap<usize,Complex<f64>>,
+    pub(crate) sources: HashMap<usize, Complex<f64>>,
     /// Map of wire metadata for each wire id
     pub(crate) wire_map: HashMap<String, WireMetadata>,
 }
@@ -136,4 +136,10 @@ pub(crate) struct Pulse {
     pub(crate) unit_out: Vector3<f64>,
     /// voltage source at pulse
     pub(crate) voltage_source: Complex<f64>,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Problem {
+    pub(crate) pulses: Vec<Pulse>,
+    pub(crate) frequency: f64,
 }
