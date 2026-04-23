@@ -6,6 +6,17 @@ use physical_constants::SPEED_OF_LIGHT_IN_VACUUM;
 use std::collections::HashMap;
 
 const C0: f64 = SPEED_OF_LIGHT_IN_VACUUM;
+const NODE_MERGE_EPS: f64 = 1.0e-9;
+
+type NodeKey = (i64, i64, i64);
+
+fn node_key(p: &Point3<f64>) -> NodeKey {
+    (
+        (p.x / NODE_MERGE_EPS).round() as i64,
+        (p.y / NODE_MERGE_EPS).round() as i64,
+        (p.z / NODE_MERGE_EPS).round() as i64,
+    )
+}
 
 /// Searches for a node in the existing nodes vector that has approximately the same coordinate.
 /// If a close enough node is found (using relative_eq!), returns its index and increments its incidence count.
@@ -17,17 +28,36 @@ const C0: f64 = SPEED_OF_LIGHT_IN_VACUUM;
 ///
 /// # Returns
 /// The index of the existing or newly inserted node in the vector.
-fn push_node(p: Point3<f64>, nodes: &mut Vec<Node>) -> usize {
-    if let Some(pos) = nodes.iter().position(|n| relative_eq!(n.p, p)) {
-        pos
-    } else {
-        let new_node = Node {
-            p,
-            segments: Vec::new(),
-        };
-        nodes.push(new_node);
-        nodes.len() - 1
+fn push_node(
+    p: Point3<f64>,
+    nodes: &mut Vec<Node>,
+    node_index: &mut HashMap<NodeKey, Vec<usize>>,
+) -> usize {
+    let (kx, ky, kz) = node_key(&p);
+
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            for dz in -1..=1 {
+                let neighbor_key = (kx + dx, ky + dy, kz + dz);
+                if let Some(candidates) = node_index.get(&neighbor_key) {
+                    for &idx in candidates {
+                        if relative_eq!(nodes[idx].p, p, epsilon = NODE_MERGE_EPS) {
+                            return idx;
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    let new_node = Node {
+        p,
+        segments: Vec::new(),
+    };
+    nodes.push(new_node);
+    let idx = nodes.len() - 1;
+    node_index.entry((kx, ky, kz)).or_default().push(idx);
+    idx
 }
 
 /// Segments a line between two points into smaller segments based on the target segment size.
@@ -47,6 +77,7 @@ fn segment_line(
     radius: f64,
     target_size: f64,
     nodes: &mut Vec<Node>,
+    node_index: &mut HashMap<NodeKey, Vec<usize>>,
     segments: &mut Vec<Segment>,
 ) -> Vec<usize> {
     let vector = p2 - p1;
@@ -66,8 +97,8 @@ fn segment_line(
         let p_b = p1 + vector * frac_b;
 
         // Each segment pushes both nodes
-        let idx_a = push_node(p_a, nodes);
-        let idx_b = push_node(p_b, nodes);
+        let idx_a = push_node(p_a, nodes, node_index);
+        let idx_b = push_node(p_b, nodes, node_index);
 
         result.push(idx_a);
 
@@ -109,6 +140,7 @@ pub fn compile_geometry_file(
     segment_size_divider: f64,
 ) -> Result<Antenna, AntennaFileError> {
     let mut nodes = Vec::new();
+    let mut node_index = HashMap::new();
     let mut segments = Vec::new();
     let mut wire_map = HashMap::new();
 
@@ -128,6 +160,7 @@ pub fn compile_geometry_file(
             radius,
             segment_size,
             &mut nodes,
+            &mut node_index,
             &mut segments,
         );
         let second_half = segment_line(
@@ -136,6 +169,7 @@ pub fn compile_geometry_file(
             radius,
             segment_size,
             &mut nodes,
+            &mut node_index,
             &mut segments,
         );
         let wire_nodes = first_half
@@ -168,7 +202,8 @@ pub fn compile_geometry_file(
 /// - `wire_map`: A mutable reference to the wire metadata map, used to find the node indices for the sources.
 ///
 /// # Returns
-/// An `Antenna` struct containing the nodes, segments, and wire metadata.
+/// A `Result` containing a vector of `VoltageSource` values on success, or an
+/// `AntennaFileError` if a source cannot be mapped to a valid node.
 fn collect_sources(
     file: &AntennaFile,
     wire_map: &HashMap<String, WireMetadata>,
