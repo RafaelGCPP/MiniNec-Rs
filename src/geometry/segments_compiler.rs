@@ -54,7 +54,7 @@ fn segment_line(
     let n = (length / target_size).ceil() as usize;
     let n = n.max(1);
 
-    let mut result=Vec::new();
+    let mut result = Vec::new();
     let mut last_node_idx = 0;
 
     for i in 0..n {
