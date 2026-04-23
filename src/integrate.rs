@@ -91,7 +91,6 @@ mod tests {
     fn test_integrate_multistep_validation() {
         let a = -PI / 2.0;
         let b = PI / 2.0;
-        let target = 2.0;
 
         // With one panel, expected error is about 1e-7 to 1e-6.
         let res1 = integrate(&|x: f64| x.cos(), a, b, 0);
