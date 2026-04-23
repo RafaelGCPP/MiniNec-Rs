@@ -251,6 +251,13 @@ mod tests {
         }
         assert_eq!(antenna.sources.len(), 1);
         assert_eq!(antenna.sources[0].node_index,6);
+
+        let wire = antenna.wire_map.get("wire1");
+        assert!(wire.is_some(), "Expected wire1 in wire_map");
+        let wire = wire.unwrap();
+        let expected_nodes: Vec<usize> = (0..13).collect();
+        assert_eq!(wire.nodes, expected_nodes);
+
     }
 
     #[test]
@@ -291,6 +298,8 @@ mod tests {
         }
         assert_eq!(antenna.sources.len(), 1);
         assert_eq!(antenna.sources[0].node_index,6);
+
+
     }
     #[test]
     fn test_compile_geometry_file_vertical() {
@@ -354,7 +363,7 @@ mod tests {
             );
         }
         assert_eq!(antenna.sources.len(), 1);
-        assert_eq!(antenna.sources[0].node_index,1);
+        assert_eq!(antenna.sources[0].node_index,11);
         assert_eq!(antenna.nodes[antenna.sources[0].node_index].segments.len(), 2);
     }
 

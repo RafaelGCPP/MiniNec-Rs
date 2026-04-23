@@ -14,7 +14,7 @@
     {
       "id": "source1",
       "wire_id": "wire1",
-      "position": "start",
+      "position": "end",
       "amplitude": 1.0,
       "phase": 0.0
     }
