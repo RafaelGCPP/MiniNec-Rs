@@ -79,14 +79,12 @@ pub(crate) struct Node {
 }
 
 /// The wire metadata, pointing at which nodes the wire starts, ends and its middle point (used for feeding).
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct WireMetadata {
-    /// Index of the first node of the wire
-    pub(crate) first_node: usize,
+    /// All nodes of the wire (in order)
+    pub(crate) nodes: Vec<usize>,
     /// Index of the center node of the wire
     pub(crate) middle_node: usize,
-    /// Index of the last node of the wire
-    pub(crate) last_node: usize,
 }
 
 /// Antenna representation composed by its nodes, segments and a map of wire metadata for each wire id.

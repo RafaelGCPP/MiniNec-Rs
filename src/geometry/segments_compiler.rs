@@ -40,7 +40,7 @@ fn push_node(p: Point3<f64>, nodes: &mut Vec<Node>) -> usize {
 /// - `segments`: Mutable reference to the vector of segments, where each segment is represented as a tuple of node indices.
 ///
 /// # Returns
-/// A tuple with the index of the first and last nodes generated.
+/// A list of line nodes
 fn segment_line(
     p1: Point3<f64>,
     p2: Point3<f64>,
@@ -48,13 +48,13 @@ fn segment_line(
     target_size: f64,
     nodes: &mut Vec<Node>,
     segments: &mut Vec<Segment>,
-) -> (usize, usize) {
+) -> Vec<usize> {
     let vector = p2 - p1;
     let length = vector.norm();
     let n = (length / target_size).ceil() as usize;
     let n = n.max(1);
 
-    let mut first_node_idx = None;
+    let mut result=Vec::new();
     let mut last_node_idx = 0;
 
     for i in 0..n {
@@ -68,6 +68,8 @@ fn segment_line(
         // Each segment pushes both nodes
         let idx_a = push_node(p_a, nodes);
         let idx_b = push_node(p_b, nodes);
+
+        result.push(idx_a);
 
         let s_vector = p_b - p_a;
         let segment = Segment {
@@ -85,15 +87,12 @@ fn segment_line(
         nodes[idx_a].segments.push(idx_seg);
         nodes[idx_b].segments.push(idx_seg);
 
-        // Captures the first node
-        if i == 0 {
-            first_node_idx = Some(idx_a);
-        }
         // Update the last node
         last_node_idx = idx_b;
     }
+    result.push(last_node_idx);
 
-    (first_node_idx.unwrap(), last_node_idx)
+    result
 }
 
 /// Compiles the antenna description returning an antenna abstraction with nodes and segments.
@@ -139,10 +138,13 @@ pub fn compile_geometry_file(
             &mut nodes,
             &mut segments,
         );
+        let wire_nodes= Vec::from_iter(
+            first_half.iter()
+                .chain(second_half.iter().next()).cloned()
+        );
         let wire_metadata = WireMetadata {
-            first_node: first_half.0,
-            middle_node: first_half.1, // should be the same as second_half.0
-            last_node: second_half.1,
+            nodes: wire_nodes,
+            middle_node: *first_half.last().unwrap(),
         };
 
         wire_map.insert(wire.id.clone(), wire_metadata);
@@ -167,48 +169,50 @@ pub fn compile_geometry_file(
 /// # Returns
 /// An `Antenna` struct containing the nodes, segments, and wire metadata.
 fn collect_sources(
-    file: &&AntennaFile,
-    wire_map: &mut HashMap<String, WireMetadata>,
-    nodes: &Vec<Node>
+    file: &AntennaFile,
+    wire_map: &HashMap<String, WireMetadata>,
+    nodes: &[Node]
 ) -> Result<Vec<VoltageSource>, AntennaFileError> {
-    let mut sources = Vec::new(); // Placeholder for voltage sources, to be implemented later
+    let mut sources = Vec::new();
 
     for source in &file.sources {
         let voltage = Complex::from_polar(source.amplitude, source.phase);
+
         let wire_metadata = wire_map.get(&source.wire_id).ok_or_else(|| {
-            AntennaFileError::Compile(format!(
-                "Source references unknown wire id: {}",
-                source.wire_id
-            ))
+            AntennaFileError::Compile(format!("Source references unknown wire id: {}", source.wire_id))
         })?;
+
         let node_index = match source.position {
             SourcePosition::Start => {
-                let node_idx = wire_metadata.first_node ;
-                // If the wire has an open end, move the source to the end of the segment.
-                // This works only because the second node is guaranteed to be created in sequence
-                // when the wire is open.
-                if nodes[node_idx].segments.len()>1 {
-                    node_idx
+                let mut node_iter = wire_metadata.nodes.iter();
+                let first_node = *node_iter.next().ok_or_else(|| {
+                    AntennaFileError::Compile(format!("Wire {} has no nodes", source.wire_id))
+                })?;
+
+                if nodes[first_node].segments.len() <= 1 {
+                    node_iter.next().copied().unwrap_or(first_node)
                 } else {
-                    node_idx+1
+                    first_node
                 }
             },
+
             SourcePosition::Center => wire_metadata.middle_node,
+
             SourcePosition::End => {
-                let node_idx=wire_metadata.last_node;
-                if nodes[node_idx].segments.len()>1 {
-                    node_idx
+                let mut node_iter = wire_metadata.nodes.iter().rev();
+                let last_node = *node_iter.next().ok_or_else(|| {
+                    AntennaFileError::Compile(format!("Wire {} has no nodes", source.wire_id))
+                })?;
+
+                if nodes[last_node].segments.len() <= 1 {
+                    node_iter.next().copied().unwrap_or(last_node)
                 } else {
-                    node_idx-1
+                    last_node
                 }
             },
         };
 
-        let voltage_source = VoltageSource {
-            node_index,
-            voltage,
-        };
-        sources.push(voltage_source);
+        sources.push(VoltageSource { node_index, voltage });
     }
     Ok(sources)
 }
