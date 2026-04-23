@@ -5,22 +5,22 @@ use std::collections::HashMap;
 
 /// Represents a single wire element in the antenna geometry.
 #[derive(Deserialize, Debug)]
-pub(crate) struct Wire {
+pub struct Wire {
     /// Unique identifier for the wire.
-    pub(crate) id: String,
+    pub id: String,
     /// Start point of the wire in 3D space.
-    pub(crate) start: Point3<f64>,
+    pub start: Point3<f64>,
     /// End point of the wire in 3D space.
-    pub(crate) end: Point3<f64>,
+    pub end: Point3<f64>,
     /// Diameter of the wire in meters.
-    pub(crate) diameter: f64,
+    pub diameter: f64,
 }
 
 /// Supported Ground Types.
 
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum GroundType {
+pub enum GroundType {
     /// Free Space or no ground
     FreeSpace,
     /// Perfect Ground
@@ -31,23 +31,23 @@ pub(crate) enum GroundType {
 
 /// Source
 #[derive(Deserialize, Debug)]
-pub(crate) struct Source {
+pub struct Source {
     /// Source id
-    pub(crate) id: String,
+    pub id: String,
     /// ID of the wire where the source is located
-    pub(crate) wire_id: String,
+    pub wire_id: String,
     /// Position on the wire
-    pub(crate) position: SourcePosition,
+    pub position: SourcePosition,
     /// Voltage amplitude
-    pub(crate) amplitude: f64,
+    pub amplitude: f64,
     /// Source phase
-    pub(crate) phase: f64,
+    pub phase: f64,
 }
 
 /// Position of a source relative to a wire
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum SourcePosition {
+pub enum SourcePosition {
     /// starting node
     Start,
     /// midpoint
@@ -58,88 +58,120 @@ pub(crate) enum SourcePosition {
 
 /// Represents the antenna geometry and simulation parameters loaded from a JSON file.
 #[derive(Deserialize, Debug)]
-pub(crate) struct AntennaFile {
+pub struct AntennaFile {
     /// List of wires that make up the antenna.
-    pub(crate) wires: Vec<Wire>,
+    pub wires: Vec<Wire>,
     /// Ground type or model (e.g., "free_space", "perfect_ground").
-    pub(crate) ground: GroundType,
+    pub ground: GroundType,
     /// Simulation frequency in Hz.
-    pub(crate) frequency: f64,
+    pub frequency: f64,
     /// Additional height above ground in meters.
-    pub(crate) added_height: f64,
+    pub added_height: f64,
     /// List of sources
-    pub(crate) sources: Vec<Source>,
+    pub sources: Vec<Source>,
 }
 
 /// An antenna node composed by its coordinates and incidence
 #[derive(Clone, Debug)]
-pub(crate) struct Node {
+pub struct Node {
     /// Node coordinate
-    pub(crate) p: Point3<f64>,
+    pub p: Point3<f64>,
     /// List of connecting segments
-    pub(crate) segments: Vec<usize>,
+    pub segments: Vec<usize>,
 }
 
 /// The wire metadata, pointing at which nodes the wire starts, ends and its middle point (used for feeding).
 #[derive(Clone, Debug)]
-pub(crate) struct WireMetadata {
+pub struct WireMetadata {
     /// All nodes of the wire (in order)
-    pub(crate) nodes: Vec<usize>,
+    pub nodes: Vec<usize>,
     /// Index of the center node of the wire
-    pub(crate) middle_node: usize,
+    pub middle_node: usize,
 }
 
 /// Antenna representation composed by its nodes, segments and a map of wire metadata for each wire id.
 #[derive(Clone, Debug)]
-pub(crate) struct Antenna {
+pub struct Antenna {
     /// Antenna node list
-    pub(crate) nodes: Vec<Node>,
+    pub nodes: Vec<Node>,
     /// Antenna segments
-    pub(crate) segments: Vec<Segment>,
+    pub segments: Vec<Segment>,
     /// Voltage sources indexed by node
-    pub(crate) sources: HashMap<usize, Complex<f64>>,
+    pub sources: HashMap<usize, Complex<f64>>,
     /// Map of wire metadata for each wire id
-    pub(crate) wire_map: HashMap<String, WireMetadata>,
+    pub wire_map: HashMap<String, WireMetadata>,
 }
 
 /// Segment representation
 #[derive(Clone, Debug)]
-pub(crate) struct Segment {
+pub struct Segment {
     /// start and end node indices
-    pub(crate) nodes: (usize, usize),
+    pub nodes: (usize, usize),
     /// midpoint of the segment, used for field evaluation
-    pub(crate) midpoint: Point3<f64>,
+    pub midpoint: Point3<f64>,
     /// radius of the wire at the segment
-    pub(crate) radius: f64,
+    pub radius: f64,
     /// segment length
-    pub(crate) length: f64,
+    pub length: f64,
     /// direction vector
-    pub(crate) unit_vector: Vector3<f64>,
+    pub unit_vector: Vector3<f64>,
 }
 
 /// Current pulse structure for Z matrix
 #[derive(Clone, Debug)]
-pub(crate) struct Pulse {
+pub struct Pulse {
+
     /// Node at the center of the pulse
-    pub(crate) center_node_idx: usize,
+    pub center_node_idx: usize,
     /// Center node coordinate
-    pub(crate) center_node: Point3<f64>,
-    /// Incoming segment
-    pub(crate) seg_in: usize,
-    /// Outgoing segment
-    pub(crate) seg_out: usize,
+    pub center_node: Point3<f64>,
     /// pulse length
-    pub(crate) total_length: f64,
+    pub total_length: f64,
+
+    //Input segment
+
+    /// Incoming segment
+    pub seg_in: usize,
     /// unit vector for the incoming segment
-    pub(crate) unit_in: Vector3<f64>,
+    pub seg_in_unit: Vector3<f64>,
+    /// midpoint of the incoming segment
+    pub seg_in_midpoint: Point3<f64>,
+    /// half-length or the incoming segment
+    pub seg_in_half_length: f64,
+    /// radius of the wire at the pulse on the incoming segment
+    pub seg_in_radius: f64,
+
+    // Output segment
+
+    /// Outgoing segment
+    pub seg_out: usize,
     /// unit vector for the outgoing segment
-    pub(crate) unit_out: Vector3<f64>,
+    pub seg_out_unit: Vector3<f64>,
+    /// midpoint of the outgoing segment
+    pub seg_out_midpoint: Point3<f64>,
+    /// half-length or the outgoing segment
+    pub seg_out_half_length: f64,
+    /// radius of the wire at the pulse on the outgoing segment
+    pub seg_out_radius: f64,
+
     /// voltage source at pulse
-    pub(crate) voltage_source: Complex<f64>,
+    pub voltage_source: Complex<f64>,
 }
 
+/// Problem structure containing all the necessary information for the antenna simulation,
+/// including the list of pulses, frequency, nodes, segments and wire metadata.
 #[derive(Clone, Debug)]
-pub(crate) struct Problem {
-    pub(crate) pulses: Vec<Pulse>,
-    pub(crate) frequency: f64,
+pub struct Problem {
+    /// List of pulses
+    pub pulses: Vec<Pulse>,
+    /// Operating frequency
+    pub frequency: f64,
+    // Wave number (k)
+    pub wave_number:f64,
+    /// List of nodes
+    pub nodes: Vec<Node>,
+    /// Antenna segments
+    pub segments: Vec<Segment>,
+    /// Wire to node mapping
+    pub wire_map: HashMap<String, WireMetadata>,
 }
