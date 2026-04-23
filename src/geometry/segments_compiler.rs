@@ -148,7 +148,7 @@ pub fn compile_geometry_file(
         wire_map.insert(wire.id.clone(), wire_metadata);
     }
 
-    let sources = collect_sources(&file, &mut wire_map)?;
+    let sources = collect_sources(&file, &mut wire_map, &nodes)?;
 
     Ok(Antenna {
         nodes,
@@ -169,6 +169,7 @@ pub fn compile_geometry_file(
 fn collect_sources(
     file: &&AntennaFile,
     wire_map: &mut HashMap<String, WireMetadata>,
+    nodes: &Vec<Node>
 ) -> Result<Vec<VoltageSource>, AntennaFileError> {
     let mut sources = Vec::new(); // Placeholder for voltage sources, to be implemented later
 
@@ -181,9 +182,26 @@ fn collect_sources(
             ))
         })?;
         let node_index = match source.position {
-            SourcePosition::Start => wire_metadata.first_node,
+            SourcePosition::Start => {
+                let node_idx = wire_metadata.first_node ;
+                // If the wire has an open end, move the source to the end of the segment.
+                // This works only because the second node is guaranteed to be created in sequence
+                // when the wire is open.
+                if nodes[node_idx].segments.len()>1 {
+                    node_idx
+                } else {
+                    node_idx+1
+                }
+            },
             SourcePosition::Center => wire_metadata.middle_node,
-            SourcePosition::End => wire_metadata.last_node,
+            SourcePosition::End => {
+                let node_idx=wire_metadata.last_node;
+                if nodes[node_idx].segments.len()>1 {
+                    node_idx
+                } else {
+                    node_idx-1
+                }
+            },
         };
 
         let voltage_source = VoltageSource {
@@ -226,6 +244,8 @@ mod tests {
                 2
             );
         }
+        assert_eq!(antenna.sources.len(), 1);
+        assert_eq!(antenna.sources[0].node_index,6);
     }
 
     #[test]
@@ -264,6 +284,8 @@ mod tests {
                 2
             );
         }
+        assert_eq!(antenna.sources.len(), 1);
+        assert_eq!(antenna.sources[0].node_index,6);
     }
     #[test]
     fn test_compile_geometry_file_vertical() {
@@ -295,5 +317,39 @@ mod tests {
                 incidence
             );
         }
+
+        assert_eq!(antenna.sources.len(), 1);
+        assert_eq!(antenna.sources[0].node_index,0);
     }
+
+    #[test]
+    fn test_compile_geometry_file_endfed() {
+        let file = read_antenna_from_file("TestData/endfed.json");
+        assert!(file.is_ok());
+        let file = file.unwrap();
+        let antenna = compile_geometry_file(&file, 20.0);
+        assert!(antenna.is_ok());
+        let antenna = antenna.unwrap();
+
+        assert_eq!(antenna.wire_map.len(), 1); // There is only one wire in the test file
+        assert_eq!(antenna.nodes.len(), 13); // There should be 13 nodes
+        assert_eq!(antenna.segments.len(), 12); // There should be 13 segments
+        assert_eq!(antenna.nodes[0].segments.len(), 1); // the first node is open
+        assert_eq!(antenna.nodes[12].segments.len(), 1); // the last node is open
+
+        // nodes 1..11 must have incidence 2
+        for i in 1..11 {
+            assert_eq!(
+                antenna.nodes[i].segments.len(),
+                2,
+                "Node {} has {} segments connected, expected {}",
+                i,
+                antenna.nodes[i].segments.len(),
+                2
+            );
+        }
+        assert_eq!(antenna.sources.len(), 1);
+        assert_eq!(antenna.sources[0].node_index,1);
+    }
+
 }
