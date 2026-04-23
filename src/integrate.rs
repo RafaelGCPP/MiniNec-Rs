@@ -29,11 +29,15 @@ where F: Fn(f64) -> Out
 
 
 // Integrate a function `f` over the interval [a, b] using `steps` subdivisions.
-pub fn integrate<T>(f: &T, a: f64, b: f64, steps: usize) -> T::Output
+pub fn integrate<T>(f: &T, a: f64, b: f64, steps: usize) -> Result<T::Output, String>
 where
     T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
+    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + Default + Copy,
 {
+    if steps == 0 {
+        return Err("steps must be greater than 0".to_string());
+    }
+
     let mut total = T::Output::default();
     let step_size = (b - a) / steps as f64;
     for i in 0..steps {
@@ -41,7 +45,7 @@ where
         let end = start + step_size;
         total += integrate_step(f, start, end);
     }
-    total    
+    Ok(total)
 }
 
 // Integrate a function `f` over the interval [a, b] using 5-point Gauss-Legendre quadrature.
@@ -49,25 +53,19 @@ where
 fn integrate_step<T>(f: &T, a: f64, b: f64) -> T::Output
 where
     T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
+    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + Default + Copy,
 {
     let c1 = (b - a) / 2.0;
     let c2 = (b + a) / 2.0;
-    quadrature(&|x: f64| f.eval(c1 * x + c2)) * c1
+    let mut sum = T::Output::default();
+
+    for &(x, w) in &GAUSS_LEGENDRE_POINTS {
+        sum += f.eval(c1*x+c2) * w;
+    }
+    sum*c1
 }
 
-// 5 point Gauss-Legendre quadrature in the interval [-1, 1]
-#[inline]
-fn quadrature<T>(f: &T) -> T::Output
-where
-    T: Integrable,
-    T::Output: std::ops::AddAssign + std::ops::Mul<f64, Output = T::Output> + std::ops::Add<Output = T::Output> + Default + Copy,
-{
-    GAUSS_LEGENDRE_POINTS.iter()
-        .fold(T::Output::default(), |sum, (x, w)| {
-            sum + f.eval(*x) * *w
-        })
-}
+
 
 #[cfg(test)]
 mod tests {
@@ -75,18 +73,6 @@ mod tests {
     use std::f64::consts::PI;
     use num_complex::Complex64;
 
-    #[test]
-    fn test_integrate_gauss_quadrature_core() {
-        // Baseline check: a degree-9 polynomial should be integrated exactly
-        // by 5-point Gauss-Legendre on [-1, 1] (up to floating-point roundoff).
-        // f(x) = x^9 -> integral from -1 to 1 is 0.
-        let result = quadrature(&|x: f64| x.powi(9));
-        assert!(result.abs() < 1e-15);
-
-        // f(x) = x^8 -> integral from -1 to 1 is 2/9.
-        let result = quadrature(&|x: f64| x.powi(8));
-        assert!((result - 2.0 / 9.0).abs() < 1e-15);
-    }
 
     #[test]
     fn test_integrate_step_real() {
@@ -102,16 +88,30 @@ mod tests {
     }
 
     #[test]
+    fn test_integrate_multistep_validation() {
+        let a = -PI / 2.0;
+        let b = PI / 2.0;
+        let target = 2.0;
+
+        // With one panel, expected error is about 1e-7 to 1e-6.
+        let res1 = integrate(&|x: f64| x.cos(), a, b, 0);
+
+        assert!(res1.is_err(), "Expected error when steps is zero");
+
+    }
+
+
+    #[test]
     fn test_integrate_multistep_convergence() {
         let a = -PI / 2.0;
         let b = PI / 2.0;
         let target = 2.0;
 
         // With one panel, expected error is about 1e-7 to 1e-6.
-        let res1 = integrate(&|x: f64| x.cos(), a, b, 1);
+        let res1 = integrate(&|x: f64| x.cos(), a, b, 1).unwrap();
         
         // With 6-8 panels, this should approach f64 precision limits.
-        let res8 = integrate(&|x: f64| x.cos(), a, b, 8);
+        let res8 = integrate(&|x: f64| x.cos(), a, b, 8).unwrap();
         
         assert!((res1 - target).abs() < 5e-7);
         // Keep tolerance slightly above machine epsilon to avoid flaky failures.
@@ -129,7 +129,7 @@ mod tests {
             Complex64::new(0.0, k * x).exp()
         };
 
-        let result: Complex64 = integrate(&kernel, 0.0, PI, 10);
+        let result: Complex64 = integrate(&kernel, 0.0, PI, 10).unwrap();
         let expected = Complex64::new(0.0, 2.0);
 
         assert!((result.re - expected.re).abs() < 1e-14);
@@ -149,7 +149,7 @@ mod tests {
         }
 
         let my_k = MyKernel { frequency_factor: 1.0 };
-        let result = integrate(&my_k, 0.0, PI, 4);
+        let result = integrate(&my_k, 0.0, PI, 4).unwrap();
         
         // Integral of cos(x) from 0 to PI is 0.
         assert!(result.abs() < 1e-14);
